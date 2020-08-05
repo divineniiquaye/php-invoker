@@ -1,26 +1,200 @@
-# The Biurad PHP Library Template
+# The PHP Invoker
 
-[![Latest Version](https://img.shields.io/packagist/v/biurad/php-library-starter.svg?style=flat-square)](https://packagist.org/packages/biurad/php-library-starter)
+[![Latest Version](https://img.shields.io/packagist/v/divineniiquaye/php-invoker.svg?style=flat-square)](https://packagist.org/packages/divineniiqye/php-invokerua)
 [![Software License](https://img.shields.io/badge/License-BSD--3-brightgreen.svg?style=flat-square)](LICENSE)
-[![Workflow Status](https://img.shields.io/github/workflow/status/biurad/php-library-starter/Tests?style=flat-square)](https://github.com/biurad/php-library-starter/actions?query=workflow%3ATests)
-[![Code Maintainability](https://img.shields.io/codeclimate/maintainability/biurad/php-library-starter?style=flat-square)](https://codeclimate.com/github/biurad/php-library-starter)
-[![Coverage Status](https://img.shields.io/codecov/c/github/biurad/php-library-starter?style=flat-square)](https://codecov.io/gh/biurad/php-library-starter)
-[![Quality Score](https://img.shields.io/scrutinizer/g/biurad/php-library-starter.svg?style=flat-square)](https://scrutinizer-ci.com/g/biurad/php-library-starter)
+[![Workflow Status](https://img.shields.io/github/workflow/status/divineniiquaye/php-invoker/Tests?style=flat-square)](https://github.com/divineniiqye/php-invokerua/actions?query=workflow%3ATests)
+[![Code Maintainability](https://img.shields.io/codeclimate/maintainability/divineniiquaye/php-invoker?style=flat-square)](https://codeclimate.com/github/divineniiqye/php-invokerua)
+[![Coverage Status](https://img.shields.io/codecov/c/github/divineniiquaye/php-invoker?style=flat-square)](https://codecov.io/gh/divineniiqye/php-invokerua)
+[![Quality Score](https://img.shields.io/scrutinizer/g/divineniiquaye/php-invoker.svg?style=flat-square)](https://scrutinizer-ci.com/g/divineniiqye/php-invokerua)
 [![Sponsor development of this project](https://img.shields.io/badge/sponsor%20this%20package-%E2%9D%A4-ff69b4.svg?style=flat-square)](https://biurad.com/sponsor)
 
-**biurad/php-library-starter** is a php library template repository for biurad lap. To use this library, rename **php-library-starter** and **BSD-3** on every file that contain it to your preferred library name and license.
-
-As to why this project exist, it's to serve as a template for future open source PHP library projects. Of course, feel free to fork it and make your own recipe.
+**divineniiquaye/php-invoker** is a php library that allows invoking callables with named parameters in a generic and extensible way for [PHP] 7.1+, based on reference implementation [PHP-DI Invoker](di-invoker) created by [Matthieu Napoli][@mnapoli]. This library provides clear extension points to let frameworks/projects implement any kind of dependency injection support they want, but not limited to dependency injection. Again, any [PSR-11] compliant container can be provided.
 
 ## 📦 Installation & Basic Usage
 
 This project requires PHP 7.1 or higher. The recommended way to install, is via [Composer]. Simply run:
 
 ```bash
-$ composer require biurad/php-library-starter
+$ composer require divineniiquaye/php-invoker
 ```
 
-Write a bit of **How To** use this package, so developers can have abit of idea about the repository before checking out documentation.
+Let's you working on a project and you need to invoke some named parameters in callables with whatever the order of parameters, but should be matched by their names or instance. Then we'll need an over-engineered `call_user_func()`.
+
+In short, this library is meant to be a base building block for calling a function with named parameters and/or dependency injection.
+
+Using `DivineNii\Invoker\Invoker` class method `call`:
+
+```php
+<?php
+$invoker = new DivineNii\Invoker\Invoker;
+
+$invoker->call(function () {
+    echo 'Hello world!';
+});
+
+// Simple parameter array
+$invoker->call(function ($name) {
+    echo 'Hello ' . $name;
+}, ['John']);
+
+// Named parameters
+$invoker->call(function ($name) {
+    echo 'Hello ' . $name;
+}, [
+    'name' => 'John'
+]);
+
+// Typehint parameters
+$invoker->call(function (string $name) {
+    echo 'Hello ' . $name;
+}, [
+    'name' => 'John'
+]);
+
+// Use the default value
+$invoker->call(function ($name = 'world') {
+    echo 'Hello ' . $name;
+});
+
+// Invoke any PHP callable
+$invoker->call(['MyClass', 'myStaticMethod']);
+
+// Using Class::method syntax
+$invoker->call('MyClass::myStaticMethod');
+
+// Using ":" pattern syntax
+$invoker->call('MyClass:myMethod');
+
+// Using "@" pattern syntax
+$invoker->call('MyClass@myMethod');
+```
+
+Using `DivineNii\Invoker\ParameterResolver` class in `DivineNii\Invoker\Invoker` class:
+
+Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a [`ParameterResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ParameterResolver.php) class:
+
+```php
+<?php
+use ReflectionFunctionAbstract;
+
+class ParameterResolver
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters = []): array
+    {
+        //....
+    }
+}
+```
+
+- `$providedParameters` contains the parameters provided by the user when calling `$invoker->call($callable, $parameters)`
+
+An `DivineNii\Invoker\Invoker` for now uses one parameter resolver to mix behaviors, e.g. you can mix "named parameters" support with "dependency injection" support.
+
+
+```php
+<?php
+use DivineNii\Invoker\ParameterResolver;
+
+$invoker = new DivineNii\Invoker\Invoker(new ParameterResolver);
+
+$invoker->call(function (ArticleManager $articleManager) {
+    $articleManager->publishArticle('Hello world', 'This is the article content.');
+});
+```
+
+A new instance of `ArticleManager` will be created by our parameter resolver.
+
+The fun starts to happen when we want to add support for many things:
+
+- named parameters
+- dependency injection for type-hinted parameters
+- ...
+-
+It allows to support even the weirdest use cases like:
+
+```php
+$parameters = [];
+
+// First parameter will receive "Welcome"
+$parameters[] = 'Welcome';
+
+// Parameter named "content" will receive "Hello world!"
+$parameters['content'] = 'Hello world!';
+
+// $published is not defined so it will use its default value
+$invoker->call(function ($title, $content, $published = true) {
+    // ...
+}, $parameters);
+```
+
+Rather than have you re-implement support for dependency injection with different containers every time, this package ships with 2 optional resolvers:
+
+- This resolver will inject container entries by searching for the class name using the type-hint:
+
+    ```php
+    $invoker->call(function (Psr\Logger\LoggerInterface $logger) {
+        // ...
+    });
+    ```
+
+    In this example it will `->get('Psr\Logger\LoggerInterface')` from the container and inject it, but if instance of interface exist in `$providedParameters`, it also get injected.
+
+- This resolver will inject container entries by searching for the name of the parameter:
+
+    ```php
+    $invoker->call(function ($twig) {
+        // ...
+    });
+    ```
+
+    In this example it will `->get('twig')` from the container and inject it or from `$providedParameters`.
+
+The `DivineNii\Invoker\Invoker` can be wired to your DI container to resolve the callables, but can resolve all callables including invokable class or object.
+
+For example with an invokable class:
+
+```php
+class MyHandler
+{
+    public function __invoke()
+    {
+        // ...
+    }
+}
+
+// By default this work
+$invoker->call('MyHandler');
+
+// If we set up the container to use
+$invoker = new Invoker\Invoker(null, $container);
+// Now 'MyHandler' parameters is resolved using the container if any!
+$invoker->call('MyHandler');
+```
+
+The same works for a class method:
+
+```php
+class WelcomeController
+{
+    public function home()
+    {
+        // ...
+    }
+}
+
+// By default this doesn't work: home() is not a static method
+$invoker->call(['WelcomeController', 'home']);
+
+// If we set up the container to use
+$invoker = new Invoker\Invoker(null, $container);
+// Now 'WelcomeController' is resolved using the container!
+$invoker->call(['WelcomeController', 'home']);
+// Alternatively we can use the Class::method syntax
+$invoker->call('WelcomeController::home');
+```
 
 ## 📓 Documentation
 
@@ -63,7 +237,7 @@ Please see [CONTRIBUTING] for additional details.
 $ composer test
 ```
 
-This will tests biurad/php-library-starter will run against PHP 7.2 version or higher.
+This will tests divineniiquaye/php-invoker will run against PHP 7.2 version or higher.
 
 ## 👥 Credits & Acknowledgements
 
@@ -76,7 +250,7 @@ Are you interested in sponsoring development of this project? Reach out and supp
 
 ## 📄 License
 
-**biurad/php-library-starter** is licensed under the BSD-3 license. See the [`LICENSE`](LICENSE) file for more details.
+**divineniiquaye/php-invoker** is licensed under the BSD-3 license. See the [`LICENSE`](LICENSE) file for more details.
 
 ## 🏛️ Governance
 
@@ -86,16 +260,19 @@ This project is primarily maintained by [Divine Niiquaye Ibok][@divineniiquaye].
 
 You're free to use this package, but if it makes it to your production environment we highly appreciate you sending us an [email] or [message] mentioning this library. We publish all received request's at <https://patreons.biurad.com>.
 
-Check out the other cool things people are doing with `biurad/php-library-starter`: <https://packagist.org/packages/biurad/php-library-starter/dependents>
+Check out the other cool things people are doing with `divineniiquaye/php-invoker`: <https://packagist.org/packages/divineniiqye/php-invokerua/dependents>
 
 [Composer]: https://getcomposer.org
 [@divineniiquaye]: https://github.com/divineniiquaye
-[docs]: https://docs.biurad.com/php-library-starter
-[commit]: https://commits.biurad.com/php-library-starter.git
+[docs]: https://docs.biurad.com/php-invoker
+[commit]: https://commits.biurad.com/php-invoker.git
 [UPGRADE]: UPGRADE-1.x.md
 [CHANGELOG]: CHANGELOG-0.x.md
 [CONTRIBUTING]: ./.github/CONTRIBUTING.md
-[All Contributors]: https://github.com/biurad/php-library-starter/contributors
+[All Contributors]: https://github.com/divineniiquaye/php-invoker/contributors
 [Biurad Lap]: https://team.biurad.com
 [email]: support@biurad.com
 [message]: https://projects.biurad.com/message
+[PSR-11]: http://www.php-fig.org/psr/psr-11/
+[mnapoli]: https://github.com/mnapoli
+[di-invoker]: https://github.com/PHP-DI/Invoker
