@@ -12,4 +12,4 @@ Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) princi
 
 ### Removed
 
-[unreleased]: https://github.com/biurad/php-library-starter/compare/v0.19.0...master
+[unreleased]: https://github.com/divineniiquaye/php-invoker/compare/v0.1.0...master

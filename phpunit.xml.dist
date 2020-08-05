@@ -16,7 +16,7 @@
          stopOnError="false"
 >
     <testsuites>
-        <testsuite name="PHP Library Starter Test Suite">
+        <testsuite name="PHP Invoker Test Suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
