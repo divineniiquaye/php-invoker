@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of Flight Routing.
+ * This file is part of PHP Invoker.
  *
  * PHP version 7.1 and above required
  *
