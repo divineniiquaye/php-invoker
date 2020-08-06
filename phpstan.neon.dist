@@ -4,3 +4,14 @@ includes:
 parameters:
     level: max
     paths: [src]
+
+    ignoreErrors:
+        -
+            message: "#^Only booleans are allowed in &&, Reflection(Class|Type)\\|null given on the (left|right) side.$#"
+            path: src/ParameterResolver.php
+        -
+            message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
+            path: src/CallableReflection.php
+        -
+            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
+            path: src/Invoker.php

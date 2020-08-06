@@ -17,9 +17,9 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Interfaces;
 
-use DivineNii\Invoker\Exception\InvocationException;
-use DivineNii\Invoker\Exception\NotCallableException;
-use DivineNii\Invoker\Exception\NotEnoughParametersException;
+use DivineNii\Invoker\Exceptions\InvocationException;
+use DivineNii\Invoker\Exceptions\NotCallableException;
+use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
 
 /**
  * Invoke a callable.
@@ -31,8 +31,8 @@ interface InvokerInterface
     /**
      * Call the given function using the given parameters.
      *
-     * @param callable $callable   function to call
-     * @param array    $parameters parameters to use
+     * @param array<mixed,string>|callable|string $callable   function to call
+     * @param array<int|string,mixed>             $parameters parameters to use
      *
      * @throws InvocationException          base exception class for all the sub-exceptions below
      * @throws NotCallableException

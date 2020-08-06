@@ -32,7 +32,7 @@ use ReflectionMethod;
 class CallableReflection
 {
     /**
-     * @param callable $callable
+     * @param callable|string $callable
      *
      * @throws NotCallableException
      *

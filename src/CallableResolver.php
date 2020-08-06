@@ -92,7 +92,7 @@ class CallableResolver
      *
      * @throws NotCallableException
      *
-     * @return callable
+     * @return array<mixed,string>|callable|string
      */
     private function resolveFromContainer($callable)
     {

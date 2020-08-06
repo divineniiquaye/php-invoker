@@ -25,7 +25,7 @@ namespace DivineNii\Invoker\Exceptions;
 class NotCallableException extends InvocationException
 {
     /**
-     * @param string $value
+     * @param mixed $value
      * @param bool   $containerEntry
      *
      * @return InvocationException

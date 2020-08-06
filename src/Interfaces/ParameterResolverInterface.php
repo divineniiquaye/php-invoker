@@ -32,7 +32,7 @@ interface ParameterResolverInterface
      * @param ReflectionFunctionAbstract $reflection         reflection object for the callable
      * @param array<int|string,mixed>    $providedParameters parameters provided by the caller
      *
-     * @return array
+     * @return array<int,mixed>
      */
     public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters = []): array;
 }
