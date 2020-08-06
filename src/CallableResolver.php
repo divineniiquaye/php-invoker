@@ -17,7 +17,6 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker;
 
-use Closure;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -56,21 +55,30 @@ class CallableResolver
      */
     public function resolve($callable)
     {
-        // Shortcut for a very common use case
-        if ($callable instanceof Closure) {
-            return $callable;
-        }
-
         if (\is_string($callable) && 1 === \preg_match(self::CALLABLE_PATTERN, $callable, $matches)) {
             // check for callable as "class:method", and "class@method"
             $callable = [$matches[1], $matches[3]];
         }
 
-        if ((\is_string($callable) || \is_object($callable)) && \method_exists($callable, '__invoke')) {
-            $callable = [$callable, '__invoke'];
+        // The callable is a container entry name
+        if (\is_string($callable) && null !== $this->container) {
+            try {
+                return $this->resolve($this->container->get($callable));
+            } catch (NotFoundExceptionInterface $e) {
+                if ($this->container->has($callable)) {
+                    throw $e;
+                }
+
+                throw NotCallableException::fromInvalidCallable($callable, true);
+            }
         }
 
         $callable = $this->resolveFromContainer($callable);
+
+        // Callable object or string (i.e. implementing __invoke())
+        if ((\is_string($callable) || \is_object($callable)) && \method_exists($callable, '__invoke')) {
+            return $this->resolve([$callable, '__invoke']);
+        }
 
         if (!\is_callable($callable)) {
             throw NotCallableException::fromInvalidCallable($callable, true);
@@ -99,19 +107,6 @@ class CallableResolver
             }
         }
 
-        // The callable is a container entry name
-        if (\is_string($callable) && null !== $this->container) {
-            try {
-                return $this->resolve($this->container->get($callable));
-            } catch (NotFoundExceptionInterface $e) {
-                if ($this->container->has($callable)) {
-                    throw $e;
-                }
-
-                throw NotCallableException::fromInvalidCallable($callable, true);
-            }
-        }
-
         // The callable is an array whose first item is a container entry name
         // e.g. ['some-container-entry', 'methodToCall']
         if (\is_array($callable) && \is_string($callable[0])) {
@@ -127,7 +122,7 @@ class CallableResolver
 
                 return $callable;
             } catch (Throwable $e) {
-                if ($this->container->has($callable[0])) {
+                if (null !== $this->container && $this->container->has($callable[0])) {
                     throw $e;
                 }
 
