@@ -19,4 +19,44 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <InvalidArgument>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </InvalidArgument>
+
+        <InvalidCatch>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+                <file name="src/ParameterResolver.php"/>
+            </errorLevel>
+        </InvalidCatch>
+
+        <ArgumentTypeCoercion>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </ArgumentTypeCoercion>
+
+        <InvalidReturnStatement>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </InvalidReturnStatement>
+
+        <PossiblyInvalidArgument>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </PossiblyInvalidArgument>
+
+        <PossiblyInvalidArrayAccess>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </PossiblyInvalidArrayAccess>
+    </issueHandlers>
 </psalm>
