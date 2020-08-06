@@ -74,6 +74,18 @@ class CallableResolverTest extends TestCase
         $factory->resolve([Fixtures\BlankClass::class, 'none']);
     }
 
+    public function testNotResolveWithObject(): void
+    {
+        $factory = new CallableResolver();
+
+        $this->expectExceptionMessage(
+            'Instance of DivineNii\Invoker\Tests\Fixtures\BlankClassMagic is not a callable'
+        );
+        $this->expectException(NotCallableException::class);
+
+        $factory->resolve(new Fixtures\BlankClassMagic());
+    }
+
     public function testResolveWithContainer(): void
     {
         $container = $this->createMock(ContainerInterface::class);
@@ -161,6 +173,29 @@ class CallableResolverTest extends TestCase
 
         $factory = new CallableResolver($container);
         $factory->resolve([BlankClassMagic::class, 'staticMethod']);
+    }
+
+    public function testResolveWithContainerHasNotException(): void
+    {
+        $container    = $this->createMock(ContainerInterface::class);
+        $newException = new class ('is not a callable, none.') extends InvocationException {
+        };
+
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willThrowException($newException);
+
+        $this->expectExceptionMessage('\'handler\' is not a callable');
+        $this->expectException(NotCallableException::class);
+
+        $factory = new CallableResolver($container);
+
+        try {
+            $factory->resolve(['handler', 'noneMethod']);
+        } catch (NotCallableException $e) {
+            $this->assertSame('handler::noneMethod() is not a callable.', $e->getMessage());
+
+            throw NotCallableException::fromInvalidCallable('handler');
+        }
     }
 
     /**
