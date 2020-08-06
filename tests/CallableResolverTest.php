@@ -95,7 +95,7 @@ class CallableResolverTest extends TestCase
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->with('handler')->willReturn(true);
-        $container->method('get')->willThrowException($this->notFoundException());
+        $container->method('get')->willThrowException(self::notFoundException());
 
         $this->expectExceptionMessage('Is not a callable, yeah.');
         $this->expectException(NotFoundExceptionInterface::class);
@@ -113,7 +113,7 @@ class CallableResolverTest extends TestCase
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->with('handler')->willReturn(false);
-        $container->method('get')->willThrowException($this->notFoundException());
+        $container->method('get')->willThrowException(self::notFoundException());
 
         if (\is_array($unResolved)) {
             $this->expectExceptionMessage(
@@ -132,7 +132,7 @@ class CallableResolverTest extends TestCase
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->with(Fixtures\BlankClassMagic::class)->willReturn(false);
-        $container->method('get')->willThrowException($this->notFoundException());
+        $container->method('get')->willThrowException(self::notFoundException());
 
         $this->expectExceptionMessage(
             'Cannot call DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() because staticMethod() ' .
@@ -240,7 +240,7 @@ class CallableResolverTest extends TestCase
     /**
      * @return NotFoundExceptionInterface|Throwable
      */
-    private function notFoundException()
+    public static function notFoundException()
     {
         return new class ('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
         };
