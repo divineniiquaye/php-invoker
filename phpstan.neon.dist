@@ -7,7 +7,7 @@ parameters:
 
     ignoreErrors:
         -
-            message: "#^Only booleans are allowed in &&, Reflection(Class|Type)\\|null given on the (left|right) side.$#"
+            message: "#^Only booleans are allowed in &&, (Reflection(Class|Type)\\|null|string) given on the (left|right) side.$#"
             path: src/ParameterResolver.php
         -
             message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
