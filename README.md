@@ -273,6 +273,7 @@ Check out the other cool things people are doing with `divineniiquaye/php-invoke
 [Biurad Lap]: https://team.biurad.com
 [email]: support@biurad.com
 [message]: https://projects.biurad.com/message
+[PHP]: https://php.net
 [PSR-11]: http://www.php-fig.org/psr/psr-11/
-[mnapoli]: https://github.com/mnapoli
+[@mnapoli]: https://github.com/mnapoli
 [di-invoker]: https://github.com/PHP-DI/Invoker
