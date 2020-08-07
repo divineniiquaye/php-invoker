@@ -12,7 +12,7 @@
 
 ## 📦 Installation & Basic Usage
 
-This project requires PHP 7.1 or higher. The recommended way to install, is via [Composer]. Simply run:
+This project requires [PHP] 7.1 or higher. The recommended way to install, is via [Composer]. Simply run:
 
 ```bash
 $ composer require divineniiquaye/php-invoker
@@ -224,10 +224,9 @@ To report a security vulnerability, please use the [Biurad Security](https://sec
 
 Contributions to this library are **welcome**, especially ones that:
 
-- Improve usability or flexibility without compromising our ability to adhere to ???.
+- Improve usability or flexibility without compromising our ability to adhere to [PSR-12] coding stardand.
 - Optimize performance
-- Fix issues with adhering to ???.
-- ???.
+- Fix issues with adhering to [PSR-11] support and backward compatability.
 
 Please see [CONTRIBUTING] for additional details.
 
@@ -275,5 +274,6 @@ Check out the other cool things people are doing with `divineniiquaye/php-invoke
 [message]: https://projects.biurad.com/message
 [PHP]: https://php.net
 [PSR-11]: http://www.php-fig.org/psr/psr-11/
+[PSR-12]: http://www.php-fig.org/psr/psr-12/
 [@mnapoli]: https://github.com/mnapoli
 [di-invoker]: https://github.com/PHP-DI/Invoker
