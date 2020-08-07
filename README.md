@@ -1,11 +1,11 @@
 # The PHP Invoker
 
-[![Latest Version](https://img.shields.io/packagist/v/divineniiquaye/php-invoker.svg?style=flat-square)](https://packagist.org/packages/divineniiqye/php-invokerua)
+[![Latest Version](https://img.shields.io/packagist/v/divineniiquaye/php-invoker.svg?style=flat-square)](https://packagist.org/packages/divineniiqauye/php-invoker)
 [![Software License](https://img.shields.io/badge/License-BSD--3-brightgreen.svg?style=flat-square)](LICENSE)
-[![Workflow Status](https://img.shields.io/github/workflow/status/divineniiquaye/php-invoker/Tests?style=flat-square)](https://github.com/divineniiqye/php-invokerua/actions?query=workflow%3ATests)
-[![Code Maintainability](https://img.shields.io/codeclimate/maintainability/divineniiquaye/php-invoker?style=flat-square)](https://codeclimate.com/github/divineniiqye/php-invokerua)
-[![Coverage Status](https://img.shields.io/codecov/c/github/divineniiquaye/php-invoker?style=flat-square)](https://codecov.io/gh/divineniiqye/php-invokerua)
-[![Quality Score](https://img.shields.io/scrutinizer/g/divineniiquaye/php-invoker.svg?style=flat-square)](https://scrutinizer-ci.com/g/divineniiqye/php-invokerua)
+[![Workflow Status](https://img.shields.io/github/workflow/status/divineniiquaye/php-invoker/Tests?style=flat-square)](https://github.com/divineniiquaye/php-invoker/actions?query=workflow%3ATests)
+[![Code Maintainability](https://img.shields.io/codeclimate/maintainability/divineniiquaye/php-invoker?style=flat-square)](https://codeclimate.com/github/divineniiquaye/php-invoker)
+[![Coverage Status](https://img.shields.io/codecov/c/github/divineniiquaye/php-invoker?style=flat-square)](https://codecov.io/gh/divineniiqauye/php-invoker)
+[![Quality Score](https://img.shields.io/scrutinizer/g/divineniiquaye/php-invoker.svg?style=flat-square)](https://scrutinizer-ci.com/g/divineniiquaye/php-invoker)
 [![Sponsor development of this project](https://img.shields.io/badge/sponsor%20this%20package-%E2%9D%A4-ff69b4.svg?style=flat-square)](https://biurad.com/sponsor)
 
 **divineniiquaye/php-invoker** is a php library that allows invoking callables with named parameters in a generic and extensible way for [PHP] 7.1+, based on reference implementation [PHP-DI Invoker](di-invoker) created by [Matthieu Napoli][@mnapoli]. This library provides clear extension points to let frameworks/projects implement any kind of dependency injection support they want, but not limited to dependency injection. Again, any [PSR-11] compliant container can be provided.
@@ -260,7 +260,7 @@ This project is primarily maintained by [Divine Niiquaye Ibok][@divineniiquaye].
 
 You're free to use this package, but if it makes it to your production environment we highly appreciate you sending us an [email] or [message] mentioning this library. We publish all received request's at <https://patreons.biurad.com>.
 
-Check out the other cool things people are doing with `divineniiquaye/php-invoker`: <https://packagist.org/packages/divineniiqye/php-invokerua/dependents>
+Check out the other cool things people are doing with `divineniiquaye/php-invoker`: <https://packagist.org/packages/divineniiquaye/php-invoker/dependents>
 
 [Composer]: https://getcomposer.org
 [@divineniiquaye]: https://github.com/divineniiquaye
