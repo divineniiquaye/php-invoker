@@ -31,6 +31,7 @@
             <errorLevel type="suppress">
                 <file name="src/CallableResolver.php"/>
                 <file name="src/ParameterResolver.php"/>
+                <file name="src/ResolverChain.php"/>
             </errorLevel>
         </InvalidCatch>
 

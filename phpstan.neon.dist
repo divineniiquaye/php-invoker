@@ -7,7 +7,7 @@ parameters:
 
     ignoreErrors:
         -
-            message: "#^Only booleans are allowed in &&, (Reflection(Class|Type)\\|null|string) given on the (left|right) side.$#"
+            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/ParameterResolver.php
         -
             message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
@@ -15,3 +15,6 @@ parameters:
         -
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/Invoker.php
+        -
+            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
+            path: src/ResolverChain.php

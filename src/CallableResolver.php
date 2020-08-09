@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker;
 
+use Closure;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -55,6 +56,11 @@ class CallableResolver
      */
     public function resolve($callable)
     {
+        // Shortcut for a very common use case
+        if ($callable instanceof Closure) {
+            return $callable;
+        }
+
         if (\is_string($callable) && 1 === \preg_match(self::CALLABLE_PATTERN, $callable, $matches)) {
             // check for callable as "class:method", and "class@method"
             $callable = [$matches[1], $matches[3]];
@@ -81,7 +87,7 @@ class CallableResolver
         }
 
         if (!\is_callable($callable)) {
-            throw NotCallableException::fromInvalidCallable($callable, true);
+            throw NotCallableException::fromInvalidCallable($callable, null !== $this->container);
         }
 
         return $callable;
@@ -142,7 +148,7 @@ class CallableResolver
                     ));
                 }
 
-                throw NotCallableException::fromInvalidCallable($callable);
+                throw NotCallableException::fromInvalidCallable($callable, null !== $this->container);
             }
         }
 

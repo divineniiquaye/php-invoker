@@ -19,6 +19,7 @@ namespace DivineNii\Invoker;
 
 use Closure;
 use DivineNii\Invoker\Exceptions\NotCallableException;
+use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
@@ -58,6 +59,10 @@ class CallableReflection
 
         [$class, $method] = $callable;
 
-        return new ReflectionMethod($class, $method);
+        try {
+            return new ReflectionMethod($class, $method);
+        } catch (ReflectionException $e) {
+            throw NotCallableException::fromInvalidCallable($callable);
+        }
     }
 }

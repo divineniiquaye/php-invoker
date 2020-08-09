@@ -18,20 +18,40 @@ declare(strict_types=1);
 namespace DivineNii\Invoker;
 
 use DivineNii\Invoker\Interfaces\ParameterResolverInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use ReflectionException;
 use ReflectionFunctionAbstract;
-use ReflectionParameter;
 
 class ParameterResolver implements ParameterResolverInterface
 {
-    /** @var null|ContainerInterface */
-    private $container;
+    /** @var callable[]
+     */
+    private $resolvers;
 
-    public function __construct(?ContainerInterface $container = null)
+    /**
+     * @param callable[] $resolvers
+     */
+    public function __construct(array $resolvers = [])
     {
-        $this->container = $container;
+        $this->resolvers = $resolvers;
+    }
+
+    /**
+     * Push a parameter resolver after the ones already registered.
+     *
+     * @param callable $resolver
+     */
+    public function appendResolver(callable $resolver): void
+    {
+        $this->resolvers[] = $resolver;
+    }
+
+    /**
+     * Insert a parameter resolver before the ones already registered.
+     *
+     * @param callable $resolver
+     */
+    public function prependResolver(callable $resolver): void
+    {
+        \array_unshift($this->resolvers, $resolver);
     }
 
     /**
@@ -39,83 +59,20 @@ class ParameterResolver implements ParameterResolverInterface
      */
     public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters = []): array
     {
-        return \array_map(
-            function (ReflectionParameter $parameter) use ($providedParameters) {
-                $parameterClass = $parameter->getClass();
-                $parameterName  = $parameter->name;
+        $reflectionParameters = $reflection->getParameters();
+        $resolvedParameters   = [];
 
-                /*
-                 * Tries to map an associative array (string-indexed) to the parameter names.
-                 *
-                 * E.g. `->getParameters($callable, ['foo' => 'bar'])` will inject the string `'bar'`
-                 * in the parameter named `$foo`.
-                 */
-                if (\array_key_exists($parameterName, $providedParameters)) {
-                    return $providedParameters[$parameterName];
-                }
+        foreach ($this->resolvers as $resolver) {
+            $resolvedParameters = ($resolver)($reflection, $providedParameters, $resolvedParameters);
 
-                /*
-                 * Inject entries from a DI container using the parameter names.
-                 */
-                if ($parameterName && (null !== $this->container && $this->container->has($parameterName))) {
-                    return $this->container->get($parameterName);
-                }
+            $diff = \array_diff_key($reflectionParameters, $resolvedParameters);
 
-                /*
-                 * Inject or create a class instance from a DI container or return existing instance
-                 * from $providedParameters using the type-hints.
-                 */
-                if ($parameterClass && $parameter->getType()) {
-                    // Tries to match type-hints with the parameters provided.
-                    if (\array_key_exists($parameterClass->name, $providedParameters)) {
-                        return $providedParameters[$parameterClass->name];
-                    }
+            if (empty($diff)) {
+                // Stop traversing: all parameters are resolved
+                return $resolvedParameters;
+            }
+        }
 
-                    // Inject entries from a DI container using the type-hints.
-                    if (null !== $this->container) {
-                        try {
-                            return $this->container->get($parameterClass->name);
-                        } catch (NotFoundExceptionInterface $e) {
-                            // We need no exception thrown here
-                        }
-                    }
-
-                    // If an instance is detected
-                    foreach ($providedParameters as $index => $value) {
-                        if (\is_a($value, $parameterClass->name, true)) {
-                            return $providedParameters[$index];
-                        }
-                    }
-
-                    if ($parameterClass->isInstantiable()) {
-                        return $parameterClass->newInstance();
-                    }
-                }
-
-                /*
-                 * Finds the default value for a parameter, *if it exists*.
-                 */
-                if ($parameter->isDefaultValueAvailable() || $parameter->isOptional()) {
-                    try {
-                        return $parameter->getDefaultValue();
-                    } catch (ReflectionException $e) {
-                        // Can't get default values from PHP internal classes and functions
-                    }
-                }
-
-                /*
-                 * Simply returns all the values of the $providedParameters array that are
-                 * indexed by the parameter position (i.e. a number) or null.
-                 *
-                 * E.g. `->call($callable, ['foo', 'bar'])` will simply resolve the parameters
-                 * to `['foo', 'bar']`.
-                 *
-                 * Parameters that are not indexed by a number (i.e. parameter position)
-                 * will return null.
-                 */
-                return $providedParameters[$parameter->getPosition()] ?? null;
-            },
-            $reflection->getParameters()
-        );
+        return $resolvedParameters;
     }
 }

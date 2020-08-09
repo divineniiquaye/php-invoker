@@ -27,7 +27,7 @@ use ReflectionParameter;
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class Invoker implements Interfaces\InvokerInterface
+class Invoker extends ResolverChain implements Interfaces\InvokerInterface
 {
     /**
      * @var CallableResolver
@@ -40,15 +40,15 @@ class Invoker implements Interfaces\InvokerInterface
     private $parameterResolver;
 
     /**
-     * @var null|ContainerInterface
+     * @param callable[]         $resolvers
+     * @param ContainerInterface $container
      */
-    private $container;
-
-    public function __construct(ParameterResolverInterface $parameterResolver = null, ContainerInterface $container = null)
+    public function __construct(array $resolvers = [], ContainerInterface $container = null)
     {
-        $this->container         = $container;
+        parent::__construct($container);
+
         $this->callableResolver  = new CallableResolver($container);
-        $this->parameterResolver = $parameterResolver ?? new ParameterResolver($container);
+        $this->parameterResolver = new ParameterResolver($this->createParameterResolver($resolvers));
     }
 
     /**
@@ -89,18 +89,31 @@ class Invoker implements Interfaces\InvokerInterface
     }
 
     /**
-     * @return null|ContainerInterface
-     */
-    public function getContainer(): ?ContainerInterface
-    {
-        return $this->container;
-    }
-
-    /**
      * @return CallableResolver
      */
     public function getCallableResolver(): CallableResolver
     {
         return $this->callableResolver;
+    }
+
+    /**
+     * Create the parameter resolvers.
+     *
+     * @param callable[] $resolvers
+     *
+     * @return array<int|string,mixed>
+     */
+    private function createParameterResolver(array $resolvers): array
+    {
+        return \array_merge(
+            [
+                [$this, 'resolveNumericArray'],
+                [$this, 'resolveTypeHint'],
+                [$this, 'resolveAssociativeArray'],
+                [$this, 'resolveDefaultValue'],
+                [$this, 'resolveParameterContainer'],
+            ],
+            $resolvers
+        );
     }
 }
