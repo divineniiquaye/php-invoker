@@ -1,6 +1,6 @@
 {
     "name": "divineniiquaye/php-invoker",
-    "description": "A PHP package template repository.",
+    "description": "A library that provides the abilities to invoking callables with named parameters in a generic and extensible way.",
     "type": "library",
     "keywords": ["biurad","invoker","resolver","php7"],
     "homepage": "https://www.biurad.com",
