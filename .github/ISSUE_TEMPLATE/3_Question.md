@@ -9,5 +9,5 @@ assignees: ''
 
 ## Question
 
-- Have you tried checking the documentation first? https://docs.biurad.com/php-library-starter
+- Have you tried checking the documentation first? https://docs.biurad.com/php-invoker
 - Replace this with your question
