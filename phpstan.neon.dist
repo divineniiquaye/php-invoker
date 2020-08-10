@@ -18,3 +18,6 @@ parameters:
         -
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/ResolverChain.php
+        -
+            message: "#^Only booleans are allowed in &&, string given on the left side.$#"
+            path: src/ResolverChain.php
