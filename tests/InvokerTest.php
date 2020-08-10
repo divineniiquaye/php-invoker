@@ -22,6 +22,7 @@ use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
 use DivineNii\Invoker\Interfaces\ParameterResolverInterface;
 use DivineNii\Invoker\Invoker;
+use DivineNii\Invoker\ResolverChain;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -38,6 +39,7 @@ class InvokerTest extends TestCase
         $invoker = new Invoker();
 
         $this->assertNull($invoker->getContainer());
+        $this->assertInstanceof(ResolverChain::class, $invoker);
         $this->assertInstanceOf(CallableResolver::class, $invoker->getCallableResolver());
         $this->assertInstanceOf(ParameterResolverInterface::class, $invoker->getParameterResolver());
     }

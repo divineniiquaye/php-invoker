@@ -19,6 +19,7 @@ namespace DivineNii\Invoker\Tests;
 
 use DivineNii\Invoker\CallableReflection;
 use DivineNii\Invoker\Interfaces\ParameterResolverInterface;
+use DivineNii\Invoker\Invoker;
 use DivineNii\Invoker\ParameterResolver;
 use Generator;
 use PHPUnit\Framework\TestCase;
@@ -34,8 +35,7 @@ class ParameterResolverTest extends TestCase
 {
     public function testConstructor(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $factory   = new ParameterResolver($container);
+        $factory = new ParameterResolver();
 
         $this->assertInstanceOf(ParameterResolverInterface::class, $factory);
     }
@@ -49,7 +49,7 @@ class ParameterResolverTest extends TestCase
      */
     public function testGetParameters(callable $callable, array $parameters = [], array $matches = []): void
     {
-        $resolver           = new ParameterResolver();
+        $resolver           = (new Invoker())->getParameterResolver();
         $callableReflection = $this->createCallableReflection($callable);
 
         $this->assertSame($matches, $resolver->getParameters($callableReflection, $parameters));
@@ -57,7 +57,7 @@ class ParameterResolverTest extends TestCase
 
     public function testGetParametersWithInstantiable(): void
     {
-        $resolver           = new ParameterResolver();
+        $resolver           = (new Invoker())->getParameterResolver();
         $callableReflection = $this->createCallableReflection(
             function (NullLogger $logger): LoggerInterface {
                 return $logger;
@@ -65,6 +65,22 @@ class ParameterResolverTest extends TestCase
         );
 
         $resolved = $resolver->getParameters($callableReflection, []);
+        $this->assertInstanceOf(LoggerInterface::class, \current($resolved));
+    }
+
+    public function testGetParametersWithInstantiableFound(): void
+    {
+        $resolver           = (new Invoker())->getParameterResolver();
+        $callableReflection = $this->createCallableReflection(
+            function (NullLogger $logger): LoggerInterface {
+                return $logger;
+            }
+        );
+
+        $resolved = $resolver->getParameters(
+            $callableReflection,
+            [LoggerInterface::class => new NullLogger()]
+        );
         $this->assertInstanceOf(LoggerInterface::class, \current($resolved));
     }
 
@@ -79,7 +95,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(true);
         $container->method('get')->willReturn(new NullLogger());
 
-        $resolver           = new ParameterResolver($container);
+        $resolver           = (new Invoker([], $container))->getParameterResolver();
         $callableReflection = $this->createCallableReflection($callable);
 
         $resolved = $resolver->getParameters($callableReflection, []);
@@ -93,7 +109,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(false);
         $container->method('get')->willReturn(new NullLogger());
 
-        $resolver           = new ParameterResolver($container);
+        $resolver           = (new Invoker([], $container))->getParameterResolver();
         $callableReflection = $this->createCallableReflection(
             [new Fixtures\BlankClass(), 'methodWithTypeHintParameter']
         );
@@ -109,7 +125,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(false);
         $container->method('get')->willThrowException(CallableResolverTest::notFoundException());
 
-        $resolver           = new ParameterResolver($container);
+        $resolver           = (new Invoker([], $container))->getParameterResolver();
         $callableReflection = $this->createCallableReflection(
             function (NullLogger $logger): LoggerInterface {
                 return $logger;
@@ -151,7 +167,7 @@ class ParameterResolverTest extends TestCase
         yield 'String Callable without variable' => [
             'phpinfo',
             [],
-            [null],
+            [],
         ];
 
         yield 'Callable with named variable' => [
@@ -197,7 +213,31 @@ class ParameterResolverTest extends TestCase
                 return $name . $num;
             },
             [1 => 23, 0 => 'Divine'],
+            [1 => 23, 0 => 'Divine'],
+        ];
+
+        yield 'Closure Callable with default typehint variables' => [
+            function (string $name, int $num = 23): string {
+                return $name . $num;
+            },
+            ['name' => 'Divine'],
             ['Divine', 23],
+        ];
+
+        yield 'Closure Callable with default undefined variable' => [
+            function ($name, $bar = null): string {
+                return $name . $num;
+            },
+            ['name' => 'Divine'],
+            ['Divine', null],
+        ];
+
+        yield 'Closure Callable with default highest priority variable' => [
+            function ($foo, $bar = 300) {
+                return [$foo, $bar];
+            },
+            ['foo' => 'foo', 'bar'],
+            ['bar', 300],
         ];
     }
 

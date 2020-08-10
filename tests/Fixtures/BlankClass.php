@@ -33,7 +33,7 @@ class BlankClass
         return self::BODY;
     }
 
-    public function staticMethod(): string
+    public static function staticMethod(): string
     {
         return self::BODY;
     }
@@ -54,9 +54,9 @@ class BlankClass
         return [$logger, $container];
     }
 
-    public function methodWithTypeHintParameter(LoggerInterface $loggger): LoggerInterface
+    public function methodWithTypeHintParameter(LoggerInterface $logger): LoggerInterface
     {
-        return $loggger;
+        return $logger;
     }
 
     /**

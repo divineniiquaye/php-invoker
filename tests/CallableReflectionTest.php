@@ -22,7 +22,6 @@ use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Tests\Fixtures\BlankClass;
 use DivineNii\Invoker\Tests\Fixtures\BlankClassMagic;
 use PHPUnit\Framework\TestCase;
-use ReflectionException;
 use ReflectionFunction;
 use ReflectionMethod;
 
@@ -53,12 +52,13 @@ class CallableReflectionTest extends TestCase
         $this->assertInstanceOf(ReflectionFunction::class, CallableReflection::create('phpinfo'));
     }
 
-    public function testCreateReflectionException(): void
+    public function testCreateCatchReflectionException(): void
     {
         $this->expectExceptionMessage(
-            'Method DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::method() does not exist'
+            'DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::method() is not a callable. ' .
+            'A __call() method exists but magic methods are not supported.'
         );
-        $this->expectException(ReflectionException::class);
+        $this->expectException(NotCallableException::class);
 
         CallableReflection::create([new BlankClassMagic(), 'method']);
     }

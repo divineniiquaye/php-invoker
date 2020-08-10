@@ -47,7 +47,7 @@ class CallableResolverTest extends TestCase
 
         $this->expectExceptionMessage(
             '\'DivineNii\\\\Invoker\\\\Tests\\\\Fixtures\\\\BlankClass::staticNotMethod\'' .
-            ' is neither a callable nor a valid container entry'
+            ' is not a callable'
         );
         $this->expectException(NotCallableException::class);
 
@@ -58,7 +58,7 @@ class CallableResolverTest extends TestCase
     {
         $factory = new CallableResolver();
 
-        $this->expectExceptionMessage('\'handler\' is neither a callable nor a valid container entry');
+        $this->expectExceptionMessage('\'handler\' is not a callable');
         $this->expectException(NotCallableException::class);
 
         $factory->resolve('handler');
