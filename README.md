@@ -71,18 +71,22 @@ $invoker->call('MyClass@myMethod');
 
 Using `DivineNii\Invoker\ParameterResolver` class in `DivineNii\Invoker\Invoker` class:
 
-Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a [`ParameterResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ParameterResolver.php) class:
+Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a callable to [`ParameterResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ParameterResolver.php) class:
 
 ```php
 <?php
 use ReflectionFunctionAbstract;
 
-class ParameterResolver
+class MyParameterResolver
 {
     /**
-     * {@inheritdoc}
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array<int|string,mixed>    $providedParameters
+     * @param array<int|string,mixed>    $resolvedParameters
+     *
+     * @return array<int|mixed>
      */
-    public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters = []): array
+    public function resolve(ReflectionFunctionAbstract $reflection, array $providedParameters, array $resolvedParameters): array
     {
         //....
     }
@@ -90,29 +94,63 @@ class ParameterResolver
 ```
 
 - `$providedParameters` contains the parameters provided by the user when calling `$invoker->call($callable, $parameters)`
+- `$resolvedParameters` contains parameters that have already been resolved by other parameter resolvers
 
-An `DivineNii\Invoker\Invoker` for now uses one parameter resolver to mix behaviors, e.g. you can mix "named parameters" support with "dependency injection" support.
+An `DivineNii\Invoker\Invoker` can chain multiple parameter resolvers to mix behaviors, e.g. you can mix "named parameters" support with "dependency injection" support. This is why a `DivineNii\Invoker\ParameterResolver` should skip parameters that are already resolved in`callables $resolvedParameters argument.
 
+Here is an implementation example for dumb dependency injection that creates a new instance of the classes type-hinted:
+
+```php
+class MyParameterResolver
+{
+    /**
+     * @param ReflectionFunctionAbstract $reflection
+     * @param array<int|string,mixed>    $providedParameters
+     * @param array<int|string,mixed>    $resolvedParameters
+     *
+     * @return array<int|mixed>
+     */
+    public function static resolve(
+        ReflectionFunctionAbstract $reflection,
+        array $providedParameters,
+        array $resolvedParameters
+    ): array {
+        $parameters = $reflection->getParameters();
+ 
+        // Skip parameters already resolved
+        if (!empty($resolvedParameters)) {
+            $parameters = \array_diff_key($parameters, $resolvedParameters);
+        }
+
+        foreach ($parameters as $index => $parameter) {
+            $class = $parameter->getClass();
+            if ($class) {
+                $resolvedParameters[$index] = $class->newInstance();
+            }
+        }
+
+        return $resolvedParameters;
+    }
+}
+```
+
+To use it:
 
 ```php
 <?php
-use DivineNii\Invoker\ParameterResolver;
-
-$invoker = new DivineNii\Invoker\Invoker(new ParameterResolver);
+$invoker = new DivineNii\Invoker\Invoker([MyParameterResolver::class, 'resolve']);
 
 $invoker->call(function (ArticleManager $articleManager) {
     $articleManager->publishArticle('Hello world', 'This is the article content.');
 });
 ```
 
-A new instance of `ArticleManager` will be created by our parameter resolver.
-
-The fun starts to happen when we want to add support for many things:
+A new instance of `ArticleManager` will be created by our parameter resolver. The fun starts to happen when we want to add support for many things:
 
 - named parameters
 - dependency injection for type-hinted parameters
 - ...
--
+
 It allows to support even the weirdest use cases like:
 
 ```php
@@ -169,7 +207,7 @@ class MyHandler
 $invoker->call('MyHandler');
 
 // If we set up the container to use
-$invoker = new Invoker\Invoker(null, $container);
+$invoker = new Invoker\Invoker([], $container);
 // Now 'MyHandler' parameters is resolved using the container if any!
 $invoker->call('MyHandler');
 ```
@@ -189,7 +227,7 @@ class WelcomeController
 $invoker->call(['WelcomeController', 'home']);
 
 // If we set up the container to use
-$invoker = new Invoker\Invoker(null, $container);
+$invoker = new Invoker\Invoker([], $container);
 // Now 'WelcomeController' is resolved using the container!
 $invoker->call(['WelcomeController', 'home']);
 // Alternatively we can use the Class::method syntax
