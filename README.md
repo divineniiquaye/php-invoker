@@ -1,10 +1,10 @@
 # The PHP Invoker
 
-[![Latest Version](https://img.shields.io/packagist/v/divineniiquaye/php-invoker.svg?style=flat-square)](https://packagist.org/packages/divineniiqauye/php-invoker)
+[![Latest Version](https://img.shields.io/packagist/v/divineniiquaye/php-invoker.svg?style=flat-square)](https://packagist.org/packages/divineniiquaye/php-invoker)
 [![Software License](https://img.shields.io/badge/License-BSD--3-brightgreen.svg?style=flat-square)](LICENSE)
 [![Workflow Status](https://img.shields.io/github/workflow/status/divineniiquaye/php-invoker/Tests?style=flat-square)](https://github.com/divineniiquaye/php-invoker/actions?query=workflow%3ATests)
 [![Code Maintainability](https://img.shields.io/codeclimate/maintainability/divineniiquaye/php-invoker?style=flat-square)](https://codeclimate.com/github/divineniiquaye/php-invoker)
-[![Coverage Status](https://img.shields.io/codecov/c/github/divineniiquaye/php-invoker?style=flat-square)](https://codecov.io/gh/divineniiqauye/php-invoker)
+[![Coverage Status](https://img.shields.io/codecov/c/github/divineniiquaye/php-invoker?style=flat-square)](https://codecov.io/gh/divineniiquaye/php-invoker)
 [![Quality Score](https://img.shields.io/scrutinizer/g/divineniiquaye/php-invoker.svg?style=flat-square)](https://scrutinizer-ci.com/g/divineniiquaye/php-invoker)
 [![Sponsor development of this project](https://img.shields.io/badge/sponsor%20this%20package-%E2%9D%A4-ff69b4.svg?style=flat-square)](https://biurad.com/sponsor)
 
