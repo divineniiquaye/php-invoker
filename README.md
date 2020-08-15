@@ -8,7 +8,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/divineniiquaye/php-invoker.svg?style=flat-square)](https://scrutinizer-ci.com/g/divineniiquaye/php-invoker)
 [![Sponsor development of this project](https://img.shields.io/badge/sponsor%20this%20package-%E2%9D%A4-ff69b4.svg?style=flat-square)](https://biurad.com/sponsor)
 
-**divineniiquaye/php-invoker** is a php library that allows invoking callables with named parameters in a generic and extensible way for [PHP] 7.1+, based on reference implementation [PHP-DI Invoker](di-invoker) created by [Matthieu Napoli][@mnapoli]. This library provides clear extension points to let frameworks/projects implement any kind of dependency injection support they want, but not limited to dependency injection. Again, any [PSR-11] compliant container can be provided.
+**divineniiquaye/php-invoker** is a php library that allows invoking callables with named parameters in a generic and extensible way for [PHP] 7.1+, based on reference implementation [PHP-DI Invoker][di-invoker] created by [Matthieu Napoli][@mnapoli]. This library provides clear extension points to let frameworks/projects implement any kind of dependency injection support they want, but not limited to dependency injection. Again, any [PSR-11] compliant container can be provided.
 
 ## 📦 Installation & Basic Usage
 
