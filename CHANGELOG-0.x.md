@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## [0.1.2] - 2020-08-15
+### Fixed
+- Update broken links in README.md file
+
 ## [0.1.1] - 2020-08-10
 ### Added
 - Added over 90% tests coverage
