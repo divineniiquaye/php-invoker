@@ -7,12 +7,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         php: ['7.2', '7.3', '7.4']
-        coverage: ["true"]
-        composer-flags: [""]
-        include:
-          - php: "8.0"
-            coverage: "false"
-            composer-flags: "--ignore-platform-req=php"
     runs-on: ubuntu-latest
 
     steps:
@@ -41,23 +35,15 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer update --no-progress --optimize-autoloader ${{ matrix.composer-flags }}
+        run: composer update --no-progress --optimize-autoloader
 
       - name: Check Coding Standard
-        run: |
-          if [ "${{ matrix.coverage }}" == "true" ]; then
-            vendor/bin/phpcs
-          fi
+        run: vendor/bin/phpcs
 
       - name: Test with Phpunit
         run: |
-          if [ "${{ !matrix.coverage }}" == "false" ]; then
-            vendor/bin/phpunit --no-coverage
-          fi
-          if [ "${{ matrix.coverage }}" == "true" ]; then
-            vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
-            bash <(curl -s https://codecov.io/bash) -f coverage.clover
-          fi
+          vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
+          bash <(curl -s https://codecov.io/bash) -f coverage.clover
 
       - name: Test with Phpstan
         run: vendor/bin/phpstan analyse
