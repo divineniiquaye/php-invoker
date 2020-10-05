@@ -71,22 +71,19 @@ $invoker->call('MyClass@myMethod');
 
 Using `DivineNii\Invoker\ParameterResolver` class in `DivineNii\Invoker\Invoker` class:
 
-Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a callable to [`ParameterResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ParameterResolver.php) class:
+Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a callable to [`ArgumentResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ArgumentResolver.php) class:
 
 ```php
 <?php
-use ReflectionFunctionAbstract;
+use ReflectionParameter;
+use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 
-class MyParameterResolver
+class MyParameterValueResolver implements ArgumentValueResolverInterface
 {
     /**
-     * @param ReflectionFunctionAbstract $reflection
-     * @param array<int|string,mixed>    $providedParameters
-     * @param array<int|string,mixed>    $resolvedParameters
-     *
-     * @return array<int|mixed>
+     * {@inheritdoc}
      */
-    public function resolve(ReflectionFunctionAbstract $reflection, array $providedParameters, array $resolvedParameters): array
+    public function resolve(ReflectionParameter $parameter, array $providedParameters)
     {
         //....
     }
@@ -94,42 +91,32 @@ class MyParameterResolver
 ```
 
 - `$providedParameters` contains the parameters provided by the user when calling `$invoker->call($callable, $parameters)`
-- `$resolvedParameters` contains parameters that have already been resolved by other parameter resolvers
 
-An `DivineNii\Invoker\Invoker` can chain multiple parameter resolvers to mix behaviors, e.g. you can mix "named parameters" support with "dependency injection" support. This is why a `DivineNii\Invoker\ParameterResolver` should skip parameters that are already resolved in`callables $resolvedParameters argument.
+An `DivineNii\Invoker\Invoker` can chain multiple parameter resolvers to mix behaviors, e.g. you can mix "named parameters" support with "dependency injection" support.
 
 Here is an implementation example for dumb dependency injection that creates a new instance of the classes type-hinted:
 
 ```php
-class MyParameterResolver
+<?php
+use ReflectionClass;
+use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
+
+class MyParameterValueResolver implements ArgumentValueResolverInterface
 {
     /**
-     * @param ReflectionFunctionAbstract $reflection
-     * @param array<int|string,mixed>    $providedParameters
-     * @param array<int|string,mixed>    $resolvedParameters
-     *
-     * @return array<int|mixed>
+     * {@inheritdoc}
      */
-    public function static resolve(
-        ReflectionFunctionAbstract $reflection,
-        array $providedParameters,
-        array $resolvedParameters
-    ): array {
-        $parameters = $reflection->getParameters();
- 
-        // Skip parameters already resolved
-        if (!empty($resolvedParameters)) {
-            $parameters = \array_diff_key($parameters, $resolvedParameters);
-        }
+    public function resolve(ReflectionParameter $parameter, array $providedParameters)
+    {
+        $parameterClass = $parameter->getClass();
 
-        foreach ($parameters as $index => $parameter) {
-            $class = $parameter->getClass();
-            if ($class) {
-                $resolvedParameters[$index] = $class->newInstance();
+        if ($parameterClass instanceof ReflectionClass) {
+            try {
+                return $class->newInstance();
+            } catch (ReflectionExcetion $e) {
+                // ...
             }
         }
-
-        return $resolvedParameters;
     }
 }
 ```
@@ -138,7 +125,7 @@ To use it:
 
 ```php
 <?php
-$invoker = new DivineNii\Invoker\Invoker([MyParameterResolver::class, 'resolve']);
+$invoker = new DivineNii\Invoker\Invoker([new MyParameterValueResolver()]);
 
 $invoker->call(function (ArticleManager $articleManager) {
     $articleManager->publishArticle('Hello world', 'This is the article content.');
