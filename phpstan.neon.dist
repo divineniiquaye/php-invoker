@@ -6,9 +6,10 @@ parameters:
     paths: [src]
 
     ignoreErrors:
+        -   "#should return mixed but return statement is missing.#"
         -
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
-            path: src/ParameterResolver.php
+            path: src/ArgumentResolver.php
         -
             message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
             path: src/CallableReflection.php
@@ -16,8 +17,11 @@ parameters:
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/Invoker.php
         -
-            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
-            path: src/ResolverChain.php
+            message: "#^Property DivineNii\\\\Invoker\\\\ArgumentResolver::\\$argumentValueResolvers \\(array<DivineNii\\\\Invoker\\\\Interfaces\\\\ArgumentValueResolverInterface>\\) does not accept iterable<DivineNii\\\\Invoker\\\\Interfaces\\\\ArgumentValueResolverInterface>.$#"
+            path: src/ArgumentResolver.php
+        -
+            message: "#^Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.$#"
+            path: src/ArgumentResolver.php
         -
             message: "#^Only booleans are allowed in &&, string given on the left side.$#"
-            path: src/ResolverChain.php
+            path: src/ArgumentResolver/NamedValueResolver.php
