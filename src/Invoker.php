@@ -18,7 +18,8 @@ declare(strict_types=1);
 namespace DivineNii\Invoker;
 
 use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
-use DivineNii\Invoker\Interfaces\ParameterResolverInterface;
+use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
+use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionParameter;
 
@@ -26,29 +27,28 @@ use ReflectionParameter;
  * Invoke a callable.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * @author Divine Niiquaye Ibok <divineibok@gmail.com>
  */
-class Invoker extends ResolverChain implements Interfaces\InvokerInterface
+class Invoker implements Interfaces\InvokerInterface
 {
-    /**
-     * @var CallableResolver
-     */
+    /** @var CallableResolver */
     private $callableResolver;
 
-    /**
-     * @var ParameterResolverInterface
-     */
-    private $parameterResolver;
+    /** @var ArgumentResolverInterface */
+    private $argumentResolver;
+
+    /** @var null|ContainerInterface */
+    private $container;
 
     /**
-     * @param callable[]         $resolvers
-     * @param ContainerInterface $container
+     * @param iterable<ArgumentValueResolverInterface> $argumentValueResolvers
+     * @param null|ContainerInterface                  $container
      */
-    public function __construct(array $resolvers = [], ContainerInterface $container = null)
+    public function __construct(iterable $argumentValueResolvers = [], ?ContainerInterface $container = null)
     {
-        parent::__construct($container);
-
+        $this->container         = $container;
         $this->callableResolver  = new CallableResolver($container);
-        $this->parameterResolver = new ParameterResolver($this->createParameterResolver($resolvers));
+        $this->argumentResolver  = new ArgumentResolver($argumentValueResolvers, $container);
     }
 
     /**
@@ -58,7 +58,7 @@ class Invoker extends ResolverChain implements Interfaces\InvokerInterface
     {
         $callable           = $this->callableResolver->resolve($callable);
         $callableReflection = CallableReflection::create($callable);
-        $args               = $this->parameterResolver->getParameters($callableReflection, $parameters);
+        $args               = $this->argumentResolver->getParameters($callableReflection, $parameters);
 
         // Sort by array key because call_user_func_array ignores numeric keys
         \ksort($args);
@@ -81,11 +81,11 @@ class Invoker extends ResolverChain implements Interfaces\InvokerInterface
     }
 
     /**
-     * @return ParameterResolverInterface By default it's a ResolverChain
+     * @return ArgumentResolverInterface
      */
-    public function getParameterResolver(): ParameterResolverInterface
+    public function getArgumentResolver(): ArgumentResolverInterface
     {
-        return $this->parameterResolver;
+        return $this->argumentResolver;
     }
 
     /**
@@ -97,23 +97,10 @@ class Invoker extends ResolverChain implements Interfaces\InvokerInterface
     }
 
     /**
-     * Create the parameter resolvers.
-     *
-     * @param callable[] $resolvers
-     *
-     * @return array<int|string,mixed>
+     * @return null|ContainerInterface
      */
-    private function createParameterResolver(array $resolvers): array
+    public function getContainer(): ?ContainerInterface
     {
-        return \array_merge(
-            [
-                [$this, 'resolveNumericArray'],
-                [$this, 'resolveTypeHint'],
-                [$this, 'resolveAssociativeArray'],
-                [$this, 'resolveDefaultValue'],
-                [$this, 'resolveParameterContainer'],
-            ],
-            $resolvers
-        );
+        return $this->container;
     }
 }
