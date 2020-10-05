@@ -23,8 +23,9 @@ use ReflectionFunctionAbstract;
  * Resolves the parameters to use to call the callable.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * @author Divine Niiquaye Ibok <divineibok@gmail.com>
  */
-interface ParameterResolverInterface
+interface ArgumentResolverInterface
 {
     /**
      * Resolves the parameters to use to call the callable.

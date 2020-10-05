@@ -18,9 +18,10 @@ declare(strict_types=1);
 namespace DivineNii\Invoker\Tests;
 
 use DivineNii\Invoker\CallableReflection;
-use DivineNii\Invoker\Interfaces\ParameterResolverInterface;
+use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
 use DivineNii\Invoker\Invoker;
-use DivineNii\Invoker\ParameterResolver;
+use DivineNii\Invoker\ArgumentResolver;
+use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -29,15 +30,15 @@ use Psr\Log\NullLogger;
 use ReflectionFunctionAbstract;
 
 /**
- * ParameterResolverTest
+ * ArgumentResolverTest
  */
-class ParameterResolverTest extends TestCase
+class ArgumentResolverTest extends TestCase
 {
     public function testConstructor(): void
     {
-        $factory = new ParameterResolver();
+        $factory = new ArgumentResolver();
 
-        $this->assertInstanceOf(ParameterResolverInterface::class, $factory);
+        $this->assertInstanceOf(ArgumentResolverInterface::class, $factory);
     }
 
     /**
@@ -49,7 +50,7 @@ class ParameterResolverTest extends TestCase
      */
     public function testGetParameters(callable $callable, array $parameters = [], array $matches = []): void
     {
-        $resolver           = (new Invoker())->getParameterResolver();
+        $resolver           = (new Invoker())->getArgumentResolver();
         $callableReflection = $this->createCallableReflection($callable);
 
         $this->assertSame($matches, $resolver->getParameters($callableReflection, $parameters));
@@ -57,7 +58,7 @@ class ParameterResolverTest extends TestCase
 
     public function testGetParametersWithInstantiable(): void
     {
-        $resolver           = (new Invoker())->getParameterResolver();
+        $resolver           = (new Invoker())->getArgumentResolver();
         $callableReflection = $this->createCallableReflection(
             function (NullLogger $logger): LoggerInterface {
                 return $logger;
@@ -70,7 +71,7 @@ class ParameterResolverTest extends TestCase
 
     public function testGetParametersWithInstantiableFound(): void
     {
-        $resolver           = (new Invoker())->getParameterResolver();
+        $resolver           = (new Invoker())->getArgumentResolver();
         $callableReflection = $this->createCallableReflection(
             function (NullLogger $logger): LoggerInterface {
                 return $logger;
@@ -95,7 +96,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(true);
         $container->method('get')->willReturn(new NullLogger());
 
-        $resolver           = (new Invoker([], $container))->getParameterResolver();
+        $resolver           = (new Invoker([], $container))->getArgumentResolver();
         $callableReflection = $this->createCallableReflection($callable);
 
         $resolved = $resolver->getParameters($callableReflection, []);
@@ -109,7 +110,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(false);
         $container->method('get')->willReturn(new NullLogger());
 
-        $resolver           = (new Invoker([], $container))->getParameterResolver();
+        $resolver           = (new Invoker([], $container))->getArgumentResolver();
         $callableReflection = $this->createCallableReflection(
             [new Fixtures\BlankClass(), 'methodWithTypeHintParameter']
         );
@@ -125,7 +126,7 @@ class ParameterResolverTest extends TestCase
         $container->method('has')->willReturn(false);
         $container->method('get')->willThrowException(CallableResolverTest::notFoundException());
 
-        $resolver           = (new Invoker([], $container))->getParameterResolver();
+        $resolver           = (new Invoker([], $container))->getArgumentResolver();
         $callableReflection = $this->createCallableReflection(
             function (NullLogger $logger): LoggerInterface {
                 return $logger;
@@ -135,6 +136,37 @@ class ParameterResolverTest extends TestCase
         $resolved = $resolver->getParameters($callableReflection, []);
         $this->assertInstanceOf(LoggerInterface::class, \current($resolved));
         $this->assertInstanceOf(NullLogger::class, \current($resolved));
+    }
+
+    public function testAppendResolver(): void
+    {
+        $resolver = new ArgumentResolver();
+        $resolver->appendResolver(new Fixtures\BlankValueResolver());
+
+        $callableReflection = $this->createCallableReflection(
+            function (?ArgumentValueResolverInterface $argument = null): ?ArgumentValueResolverInterface {
+                return $argument;
+            }
+        );
+
+        $resolved = $resolver->getParameters($callableReflection);
+        $this->assertNull(\current($resolved));
+    }
+
+    public function testPrependResolver(): void
+    {
+        $resolver = new ArgumentResolver();
+        $resolver->prependResolver(new Fixtures\BlankValueResolver());
+
+        $callableReflection = $this->createCallableReflection(
+            function (?ArgumentValueResolverInterface $argument = null): ?ArgumentValueResolverInterface {
+                return $argument;
+            }
+        );
+
+        $resolved = $resolver->getParameters($callableReflection);
+        $this->assertInstanceOf(ArgumentValueResolverInterface::class, \current($resolved));
+        $this->assertInstanceOf(Fixtures\BlankValueResolver::class, \current($resolved));
     }
 
     /**
@@ -213,7 +245,7 @@ class ParameterResolverTest extends TestCase
                 return $name . $num;
             },
             [1 => 23, 0 => 'Divine'],
-            [1 => 23, 0 => 'Divine'],
+            ['Divine', 23],
         ];
 
         yield 'Closure Callable with default typehint variables' => [
