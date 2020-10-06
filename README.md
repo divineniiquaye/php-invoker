@@ -98,7 +98,7 @@ Here is an implementation example for dumb dependency injection that creates a n
 
 ```php
 <?php
-use ReflectionClass;
+use {ReflectionClass, ReflectionException};
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 
 class MyParameterValueResolver implements ArgumentValueResolverInterface
