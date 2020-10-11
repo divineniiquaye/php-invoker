@@ -72,10 +72,8 @@ class CallableResolver
                 return $this->resolve($this->container->get($callable));
             } catch (NotFoundExceptionInterface $e) {
                 if ($this->container->has($callable)) {
-                    throw $e;
+                    throw NotCallableException::fromInvalidCallable($callable, true);
                 }
-
-                throw NotCallableException::fromInvalidCallable($callable, true);
             }
         }
 

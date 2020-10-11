@@ -109,8 +109,13 @@ class CallableResolverTest extends TestCase
         $container->method('has')->with('handler')->willReturn(true);
         $container->method('get')->willThrowException(self::notFoundException());
 
-        $this->expectExceptionMessage('Is not a callable, yeah.');
-        $this->expectException(NotFoundExceptionInterface::class);
+        if (is_array($unResolved)) {
+            $this->expectExceptionMessage('Is not a callable, yeah.');
+            $this->expectException(NotFoundExceptionInterface::class);
+        } else {
+            $this->expectExceptionMessage('\'handler\' is neither a callable nor a valid container entry');
+            $this->expectException(NotCallableException::class);
+        }
 
         $factory = new CallableResolver($container);
         $factory->resolve($unResolved);

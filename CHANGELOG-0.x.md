@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) principles.
 
+## [0.9.1] - 2020-10-11
+### Fixed
+- Fixed issues with string callables throwing exception on PSR-11 containers
+
 ## [0.9.0] - 2020-10-05
 ### Added
 - Added `DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface` for `DivineNii\Invoker\ArgumentResolver` class
@@ -37,6 +41,7 @@ Updates should follow the [Keep a CHANGELOG](https://keepachangelog.com/) princi
 ### Added
 - Initial commit
 
+[0.9.1]: https://github.com/divineniiquaye/php-invoker/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/divineniiquaye/php-invoker/compare/v0.1.2...v0.9.0
 [0.1.2]: https://github.com/divineniiquaye/php-invoker/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/divineniiquaye/php-invoker/compare/v0.1.0...v0.1.1
