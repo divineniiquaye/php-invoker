@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<psalm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="https://getpsalm.org/schema/config"
+       name="Psalm for PHP Invoker"
+       useDocblockTypes="true"
+       errorLevel="3"
+       strictBinaryOperands="false"
+       rememberPropertyAssignmentsAfterCall="true"
+       checkForThrowsDocblock="false"
+       throwExceptionOnError="0"
+       ensureArrayStringOffsetsExist="true"
+       ensureArrayIntOffsetsExist="false"
+       resolveFromConfigFile="true"
+       xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="src"/>
+        <ignoreFiles>
+            <directory name="vendor"/>
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <InvalidArgument>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </InvalidArgument>
+
+        <InvalidCatch>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+                <file name="src/ArgumentResolver.php"/>
+                <file name="src/ArgumentResolver/ClassValueResolver.php"/>
+            </errorLevel>
+        </InvalidCatch>
+
+        <ArgumentTypeCoercion>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </ArgumentTypeCoercion>
+
+        <InvalidReturnStatement>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </InvalidReturnStatement>
+
+        <PossiblyInvalidArgument>
+            <errorLevel type="suppress">
+                <file name="src/CallableResolver.php"/>
+            </errorLevel>
+        </PossiblyInvalidArgument>
+
+        <PossiblyInvalidArrayAccess>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </PossiblyInvalidArrayAccess>
+
+        <InvalidPropertyAssignmentValue>
+            <errorLevel type="suppress">
+                <file name="src/ArgumentResolver.php"/>
+            </errorLevel>
+        </InvalidPropertyAssignmentValue>
+    </issueHandlers>
+</psalm>

@@ -1,0 +1,27 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    level: max
+    paths: [src]
+
+    ignoreErrors:
+        -   "#should return mixed but return statement is missing.#"
+        -
+            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
+            path: src/ArgumentResolver.php
+        -
+            message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
+            path: src/CallableReflection.php
+        -
+            message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
+            path: src/Invoker.php
+        -
+            message: "#^Property DivineNii\\\\Invoker\\\\ArgumentResolver::\\$argumentValueResolvers \\(array<DivineNii\\\\Invoker\\\\Interfaces\\\\ArgumentValueResolverInterface>\\) does not accept iterable<DivineNii\\\\Invoker\\\\Interfaces\\\\ArgumentValueResolverInterface>.$#"
+            path: src/ArgumentResolver.php
+        -
+            message: "#^Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.$#"
+            path: src/ArgumentResolver.php
+        -
+            message: "#^Only booleans are allowed in &&, string given on the left side.$#"
+            path: src/ArgumentResolver/NamedValueResolver.php
