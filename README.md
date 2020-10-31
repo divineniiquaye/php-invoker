@@ -25,7 +25,6 @@ In short, this library is meant to be a base building block for calling a functi
 Using `DivineNii\Invoker\Invoker` class method `call`:
 
 ```php
-<?php
 $invoker = new DivineNii\Invoker\Invoker;
 
 $invoker->call(function () {
@@ -69,12 +68,11 @@ $invoker->call('MyClass:myMethod');
 $invoker->call('MyClass@myMethod');
 ```
 
-Using `DivineNii\Invoker\ParameterResolver` class in `DivineNii\Invoker\Invoker` class:
+Using `DivineNii\Invoker\ArgumentResolver` class in `DivineNii\Invoker\Invoker` class:
 
 Extending the behavior of the `DivineNii\Invoker\Invoker` is easy and is done by adding a callable to [`ArgumentResolver`](https://github.com/divineniiquaye/php-invoker/blob/master/src/ArgumentResolver.php) class:
 
 ```php
-<?php
 use ReflectionParameter;
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 
@@ -97,7 +95,6 @@ An `DivineNii\Invoker\Invoker` can chain multiple parameter resolvers to mix beh
 Here is an implementation example for dumb dependency injection that creates a new instance of the classes type-hinted:
 
 ```php
-<?php
 use {ReflectionClass, ReflectionException};
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 
@@ -124,7 +121,6 @@ class MyParameterValueResolver implements ArgumentValueResolverInterface
 To use it:
 
 ```php
-<?php
 $invoker = new DivineNii\Invoker\Invoker([new MyParameterValueResolver()]);
 
 $invoker->call(function (ArticleManager $articleManager) {
