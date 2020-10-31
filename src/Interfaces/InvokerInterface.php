@@ -17,6 +17,8 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Interfaces;
 
+use DivineNii\Invoker\CallableResolver;
+use Psr\Container\ContainerInterface;
 use DivineNii\Invoker\Exceptions\InvocationException;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
@@ -25,6 +27,7 @@ use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
  * Invoke a callable.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
+ * @author Divine Niiquaye Ibok <divineibok@gmail.com>
  */
 interface InvokerInterface
 {
@@ -41,4 +44,25 @@ interface InvokerInterface
      * @return mixed result of the function
      */
     public function call($callable, array $parameters = []);
+
+    /**
+     * Gets the Argument resolver.
+     *
+     * @return ArgumentResolverInterface
+     */
+    public function getArgumentResolver(): ArgumentResolverInterface;
+
+    /**
+     * Gets the Calable resolver.
+     *
+     * @return CallableResolver
+     */
+    public function getCallableResolver(): CallableResolver;
+
+    /**
+     * Gets the PSR-11 container instance
+     *
+     * @return null|ContainerInterface
+     */
+    public function getContainer(): ?ContainerInterface;
 }

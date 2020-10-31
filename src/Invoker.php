@@ -81,7 +81,7 @@ class Invoker implements Interfaces\InvokerInterface
     }
 
     /**
-     * @return ArgumentResolverInterface
+     * {@inheritdoc}
      */
     public function getArgumentResolver(): ArgumentResolverInterface
     {
@@ -89,7 +89,7 @@ class Invoker implements Interfaces\InvokerInterface
     }
 
     /**
-     * @return CallableResolver
+     * {@inheritdoc}
      */
     public function getCallableResolver(): CallableResolver
     {
@@ -97,7 +97,7 @@ class Invoker implements Interfaces\InvokerInterface
     }
 
     /**
-     * @return null|ContainerInterface
+     * {@inheritdoc}
      */
     public function getContainer(): ?ContainerInterface
     {
