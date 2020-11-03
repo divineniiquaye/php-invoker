@@ -18,7 +18,7 @@ This project requires [PHP] 7.1 or higher. The recommended way to install, is vi
 $ composer require divineniiquaye/php-invoker
 ```
 
-Let's you working on a project and you need to invoke some named parameters in callables with whatever the order of parameters, but should be matched by their names or instance. Then we'll need an over-engineered `call_user_func()`.
+Let's say you working on a project and want to invoke some named parameters in callables with whatever the order of parameters, but should be matched by their names or instance. Then we'll need an over-engineered `call_user_func()`.
 
 In short, this library is meant to be a base building block for calling a function with named parameters and/or dependency injection.
 
