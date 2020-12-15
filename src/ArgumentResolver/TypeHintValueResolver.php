@@ -44,13 +44,8 @@ class TypeHintValueResolver implements ArgumentValueResolverInterface
     {
         $parameterType = $parameter->getType();
 
-        if (!$parameterType instanceof \ReflectionType || $parameterType->isBuiltin()) {
-            // No type and Primitive types are not supported
-            return;
-        }
-
-        if (!$parameterType instanceof \ReflectionNamedType) {
-            // Union types are not supported
+        if (!$parameterType instanceof \ReflectionNamedType || $parameterType->isBuiltin()) {
+            // No type, Primitive types and Union types are not supported
             return;
         }
 

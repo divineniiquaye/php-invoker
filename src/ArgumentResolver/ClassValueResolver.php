@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\ArgumentResolver;
 
+use ArgumentCountError;
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -44,16 +45,17 @@ class ClassValueResolver implements ArgumentValueResolverInterface
      */
     public function resolve(ReflectionParameter $parameter, array $providedParameters)
     {
-        $parameterClass = $parameter->getClass();
+        $parameterType = $parameter->getType();
 
-        if (!$parameterClass instanceof ReflectionClass) {
+        if (!$parameterType instanceof \ReflectionNamedType || $parameterType->isBuiltin()) {
+            // No type, Primitive types and Union types are not supported
             return;
         }
 
         // Inject entries from a DI container using the type-hints.
         if (null !== $this->container) {
             try {
-                return $this->container->get($parameterClass->name);
+                return $this->container->get($parameterType->getName());
             } catch (NotFoundExceptionInterface $e) {
                 // We need no exception thrown here
             }
@@ -61,11 +63,19 @@ class ClassValueResolver implements ArgumentValueResolverInterface
 
         // If an instance is detected
         foreach ($providedParameters as $key => $value) {
-            if (\is_a($value, $parameterClass->name, true)) {
+            if (\is_a($value, $parameterType->getName(), true)) {
                 return $providedParameters[$key];
             }
         }
 
-        return $parameterClass->isInstantiable() ? $parameterClass->newInstance() : null;
+        try {
+            $reflectionClass = new ReflectionClass($parameterType->getName());
+
+            if ($reflectionClass->isInstantiable()) {
+                return $reflectionClass->newInstance();
+            }
+        } catch (ArgumentCountError $e) {
+            // Throw no exception ...
+        }
     }
 }

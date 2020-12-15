@@ -37,8 +37,9 @@
 
         <ArgumentTypeCoercion>
             <errorLevel type="suppress">
-                <file name="src/CallableReflection.php"/>
-                <file name="src/CallableResolver.php"/>
+                <referencedFunction name="ReflectionClass::__construct"/>
+                <referencedFunction name="ReflectionMethod::__construct"/>
+                <referencedFunction name="method_exists"/>
             </errorLevel>
         </ArgumentTypeCoercion>
 

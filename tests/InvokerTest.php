@@ -64,14 +64,39 @@ class InvokerTest extends TestCase
      */
     public function testInvokeWithContainer($callable): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $container->method('has')->willReturn(true);
-        $container->method('get')->willReturn(new Fixtures\BlankClass());
+        $container = new class () implements ContainerInterface {
+            /**
+             * {@inheritdoc}
+             */
+            public function has($id)
+            {
+                return true;
+            }
+
+            /**
+             * {@inheritdoc}
+             */
+            public function get($id)
+            {
+                return new Fixtures\BlankClass();
+            }
+        };
 
         $invoker = new Invoker([], $container);
         $result  = $invoker->call($callable);
 
         $this->assertSame(Fixtures\BlankClass::BODY, $result);
+    }
+
+    public function testInvokeWithConstructor(): void
+    {
+        $this->expectExceptionMessage(
+            'DivineNii\Invoker\Tests\Fixtures\BlankClassWithArgument::__invoke() is not a callable.'
+        );
+        $this->expectException(NotCallableException::class);
+
+        $invoker = new Invoker();
+        $invoker->call(Fixtures\BlankClassWithArgument::class);
     }
 
     public function testCannotInvokeUnknownMethod(): void
@@ -270,6 +295,10 @@ class InvokerTest extends TestCase
 
         yield 'Should resolve callable from container with class name and : syntax' => [
             'DivineNii\Invoker\Tests\Fixtures\BlankClass:method',
+        ];
+
+        yield 'Should resolve callable from container with class name and constructor' => [
+            Fixtures\BlankClassWithArgument::class,
         ];
     }
 
