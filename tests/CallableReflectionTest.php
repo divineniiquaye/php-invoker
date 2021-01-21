@@ -43,6 +43,11 @@ class CallableReflectionTest extends TestCase
         );
 
         $this->assertInstanceOf(
+            ReflectionMethod::class,
+            CallableReflection::create(new BlankClass())
+        );
+
+        $this->assertInstanceOf(
             ReflectionFunction::class,
             CallableReflection::create(function (string $test): string {
                 return $test;

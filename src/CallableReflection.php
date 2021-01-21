@@ -33,7 +33,7 @@ use ReflectionMethod;
 class CallableReflection
 {
     /**
-     * @param callable|string $callable
+     * @param callable|mixed[]|object|string $callable
      *
      * @throws NotCallableException
      *
@@ -42,11 +42,13 @@ class CallableReflection
     public static function create($callable): ReflectionFunctionAbstract
     {
         // Standard function and closure
-        if ((\is_string($callable) && \function_exists($callable)) || $callable instanceof Closure) {
+        if ($callable instanceof Closure || (\is_string($callable) && \function_exists($callable))) {
             return new ReflectionFunction($callable);
         }
 
-        if (\is_string($callable) && \strpos($callable, '::') !== false) {
+        if (is_object($callable) && method_exists($callable, '__invoke')) {
+            $callable = [$callable, '__invoke'];
+        } elseif (\is_string($callable) && \strpos($callable, '::') !== false) {
             $callable = \explode('::', $callable, 2);
         }
 
@@ -57,7 +59,7 @@ class CallableReflection
             ));
         }
 
-        [$class, $method] = $callable;
+        list($class, $method) = $callable;
 
         try {
             return new ReflectionMethod($class, $method);
