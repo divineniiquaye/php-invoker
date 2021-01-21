@@ -17,11 +17,13 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Exceptions;
 
+use ArgumentCountError;
+
 /**
  * Not enough parameters could be resolved to invoke the callable.
  *
  * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
-class NotEnoughParametersException extends InvocationException
+class NotEnoughParametersException extends ArgumentCountError
 {
 }
