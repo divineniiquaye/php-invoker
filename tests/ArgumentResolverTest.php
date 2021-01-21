@@ -271,6 +271,12 @@ class ArgumentResolverTest extends TestCase
             ['foo' => 'foo', 'bar'],
             ['bar', 300],
         ];
+
+        yield 'Class With Catched ArgumentCountError' => [
+            [Fixtures\BlankClassWithArgument::class, 'method'],
+            [],
+            [],
+        ];
     }
 
     private function createCallableReflection(callable $callable): ReflectionFunctionAbstract

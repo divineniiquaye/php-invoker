@@ -17,6 +17,9 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Tests\Fixtures;
 
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
+
 class BlankClassWithArgument
 {
     /** @var BlankClass */
@@ -30,5 +33,10 @@ class BlankClassWithArgument
     public function __invoke(): string
     {
         return 'sample text';
+    }
+
+    public static function method(ReflectionMethod $method): ReflectionFunctionAbstract
+    {
+        return $method;
     }
 }
