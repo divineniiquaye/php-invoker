@@ -18,10 +18,9 @@ declare(strict_types=1);
 namespace DivineNii\Invoker\Interfaces;
 
 use DivineNii\Invoker\CallableResolver;
-use Psr\Container\ContainerInterface;
-use DivineNii\Invoker\Exceptions\InvocationException;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
+use Psr\Container\ContainerInterface;
 
 /**
  * Invoke a callable.
@@ -34,14 +33,13 @@ interface InvokerInterface
     /**
      * Call the given function using the given parameters.
      *
-     * @param array<mixed,string>|callable|string $callable   function to call
-     * @param array<int|string,mixed>             $parameters parameters to use
+     * @param array<mixed,string>|callable|object|string $callable   function to call
+     * @param array<int|string,mixed>                    $parameters parameters to use
      *
-     * @throws InvocationException          base exception class for all the sub-exceptions below
      * @throws NotCallableException
      * @throws NotEnoughParametersException
      *
-     * @return mixed result of the function
+     * @return false|mixed result of the function
      */
     public function call($callable, array $parameters = []);
 
