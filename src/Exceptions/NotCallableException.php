@@ -17,6 +17,9 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Exceptions;
 
+use Psr\Container\ContainerExceptionInterface;
+use Throwable;
+
 /**
  * The given callable is not actually callable.
  *
@@ -25,12 +28,13 @@ namespace DivineNii\Invoker\Exceptions;
 class NotCallableException extends InvocationException
 {
     /**
-     * @param mixed $value
-     * @param bool   $containerEntry
+     * @param mixed                                 $value
+     * @param bool                                  $containerEntry
+     * @param ContainerExceptionInterface|Throwable $previous
      *
      * @return InvocationException
      */
-    public static function fromInvalidCallable($value, $containerEntry = false): InvocationException
+    public static function fromInvalidCallable($value, bool $containerEntry = false, $previous = null): InvocationException
     {
         if (\is_object($value)) {
             $message = \sprintf('Instance of %s is not a callable', \get_class($value));
@@ -46,6 +50,6 @@ class NotCallableException extends InvocationException
             }
         }
 
-        return new self($message);
+        return new self($message, 0, $previous);
     }
 }
