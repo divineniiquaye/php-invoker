@@ -199,7 +199,7 @@ class ArgumentResolverTest extends TestCase
         yield 'String Callable without variable' => [
             'phpinfo',
             [],
-            [],
+            \PHP_VERSION_ID >= 80000 ? [INFO_ALL] : [],
         ];
 
         yield 'Callable with named variable' => [

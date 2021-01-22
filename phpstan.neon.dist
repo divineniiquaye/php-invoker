@@ -22,6 +22,3 @@ parameters:
         -
             message: "#^Only booleans are allowed in &&, string given on the left side.$#"
             path: src/ArgumentResolver/NamedValueResolver.php
-        -
-            message: "#^Parameter \\#1 \\$argument of class ReflectionClass constructor expects class-string<T of object>\\|T of object, string given.$#"
-            path: src/ArgumentResolver/ClassValueResolver.php

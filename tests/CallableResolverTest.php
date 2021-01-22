@@ -164,10 +164,15 @@ class CallableResolverTest extends TestCase
         $container->method('has')->with(Fixtures\BlankClassMagic::class)->willReturn(false);
         $container->method('get')->willThrowException(self::notFoundException());
 
-        $this->expectExceptionMessage(
-            'Cannot call DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() because ' .
-            'staticMethod() is not a static method and "DivineNii\Invoker\Tests\Fixtures\BlankClassMagic'
-        );
+        $exceptionMessage = 'Cannot call DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() because ' .
+        'staticMethod() is not a static method and "DivineNii\Invoker\Tests\Fixtures\BlankClassMagic';
+
+        if (\PHP_VERSION_ID >= 80000) {
+            $exceptionMessage = 'DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() is not a callable.' .
+            ' A __call() method exists but magic methods are not supported.';
+        }
+
+        $this->expectExceptionMessage($exceptionMessage);
         $this->expectException(NotCallableException::class);
 
         $factory = new CallableResolver($container);

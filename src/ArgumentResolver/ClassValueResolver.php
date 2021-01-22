@@ -21,7 +21,6 @@ use ArgumentCountError;
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionClass;
 use ReflectionParameter;
 
 /**
@@ -69,10 +68,8 @@ class ClassValueResolver implements ArgumentValueResolverInterface
         }
 
         try {
-            $reflectionClass = new ReflectionClass($parameterType->getName());
-
-            if ($reflectionClass->isInstantiable()) {
-                return $reflectionClass->newInstance();
+            if (\class_exists($class = $parameterType->getName())) {
+                return new $class();
             }
         } catch (ArgumentCountError $e) {
             // Throw no exception ...
