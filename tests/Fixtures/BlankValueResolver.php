@@ -18,7 +18,7 @@ declare(strict_types=1);
 namespace DivineNii\Invoker\Tests\Fixtures;
 
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
-use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionParameter;
 
 class BlankValueResolver implements ArgumentValueResolverInterface
@@ -28,11 +28,13 @@ class BlankValueResolver implements ArgumentValueResolverInterface
      */
     public function resolve(ReflectionParameter $parameter, array $providedParameters)
     {
-        if (!($parameterClass = $parameter->getClass()) instanceof ReflectionClass) {
+        $parameterType = $parameter->getType();
+
+        if (!$parameterType instanceof ReflectionNamedType) {
             return;
         }
 
-        if ($parameterClass->getName() === ArgumentValueResolverInterface::class) {
+        if ($parameterType->getName() === ArgumentValueResolverInterface::class) {
             return $this;
         }
     }

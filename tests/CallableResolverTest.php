@@ -68,6 +68,13 @@ class CallableResolverTest extends TestCase
     {
         $factory = new CallableResolver();
 
+        $this->assertIsCallable($factory->resolve([Fixtures\BlankClass::class, 'method']));
+    }
+
+    public function testNotResolveWithArrayWithException(): void
+    {
+        $factory = new CallableResolver();
+
         $this->expectExceptionMessage('DivineNii\Invoker\Tests\Fixtures\BlankClass::none() is not a callable.');
         $this->expectException(NotCallableException::class);
 
@@ -84,6 +91,14 @@ class CallableResolverTest extends TestCase
         $this->expectException(NotCallableException::class);
 
         $factory->resolve(new Fixtures\BlankClassMagic());
+    }
+
+    public function testResolveWithStaticMethod(): void
+    {
+        $factory = new CallableResolver();
+
+        $this->assertIsCallable($factory->resolve([new Fixtures\BlankClass(), 'staticMethod']));
+        $this->assertIsCallable($factory->resolve([Fixtures\BlankClass::class, 'staticMethod']));
     }
 
     public function testResolveWithContainer(): void
@@ -109,9 +124,9 @@ class CallableResolverTest extends TestCase
         $container->method('has')->with('handler')->willReturn(true);
         $container->method('get')->willThrowException(self::notFoundException());
 
-        if (is_array($unResolved)) {
-            $this->expectExceptionMessage('Is not a callable, yeah.');
-            $this->expectException(NotFoundExceptionInterface::class);
+        if (\is_array($unResolved) || 'handler@method' === $unResolved) {
+            $this->expectExceptionMessage('handler::method() is not a callable.');
+            $this->expectException(NotCallableException::class);
         } else {
             $this->expectExceptionMessage('\'handler\' is neither a callable nor a valid container entry');
             $this->expectException(NotCallableException::class);
@@ -132,10 +147,8 @@ class CallableResolverTest extends TestCase
         $container->method('has')->with('handler')->willReturn(false);
         $container->method('get')->willThrowException(self::notFoundException());
 
-        if (\is_array($unResolved)) {
-            $this->expectExceptionMessage(
-                'Cannot call method on handler because it is not a class nor a valid container entry'
-            );
+        if (\is_array($unResolved) || 'handler@method' === $unResolved) {
+            $this->expectExceptionMessage('handler::method() is not a callable.');
         } else {
             $this->expectExceptionMessage('\'handler\' is neither a callable nor a valid container entry');
         }
@@ -152,8 +165,8 @@ class CallableResolverTest extends TestCase
         $container->method('get')->willThrowException(self::notFoundException());
 
         $this->expectExceptionMessage(
-            'Cannot call DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() because staticMethod() ' .
-            'is not a static method and "DivineNii\Invoker\Tests\Fixtures\BlankClassMagic" is not a container entry'
+            'Cannot call DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() because ' .
+            'staticMethod() is not a static method and "DivineNii\Invoker\Tests\Fixtures\BlankClassMagic'
         );
         $this->expectException(NotCallableException::class);
 
@@ -161,29 +174,45 @@ class CallableResolverTest extends TestCase
         $factory->resolve([BlankClassMagic::class, 'staticMethod']);
     }
 
-    public function testResolveWithContainerHasNotAndMagicException(): void
+    /**
+     * @dataProvider implicitMagicData
+     *
+     * @param bool|string $hasContainer
+     */
+    public function testResolveWithContainerAndMagicException($hasContainer): void
     {
-        $container    = $this->createMock(ContainerInterface::class);
-        $newException = new class ('is not a callable, none.') extends InvocationException {
-        };
+        static $container;
 
-        $container->method('has')->with(Fixtures\BlankClassMagic::class)->willReturn(false);
-        $container->method('get')->willThrowException($newException);
+        if (!\is_string($hasContainer)) {
+            $container = $this->createMock(ContainerInterface::class);
 
-        $this->expectExceptionMessage(
-            'DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::staticMethod() is not a callable. ' .
-            'A __call() method exists but magic methods are not supported.'
-        );
-        $this->expectException(NotCallableException::class);
+            $container->method('has')->with(Fixtures\BlankClassMagic::class)->willReturn($hasContainer);
+            $container->method('get')->willThrowException(new InvocationException('is not a callable, none.'));
+        }
 
         $factory = new CallableResolver($container);
-        $factory->resolve([BlankClassMagic::class, 'staticMethod']);
+
+        try {
+            $callable = $factory->resolve([Fixtures\BlankClassMagic::class, 'method']);
+
+            // Will not throw an exception if $hasContainer is bool
+            $this->assertIsCallable($callable);
+        } catch (NotCallableException $e) {
+            $this->assertEquals(
+                'DivineNii\Invoker\Tests\Fixtures\BlankClassMagic::method() is not a callable. ' .
+                'A __call() method exists but magic methods are not supported.',
+                $e->getMessage()
+            );
+
+            $this->assertInstanceOf(InvocationException::class, $prev = $e->getPrevious());
+            $this->assertEquals('is not a callable, none.', $prev->getMessage());
+        }
     }
 
     public function testResolveWithContainerHasNotException(): void
     {
         $container    = $this->createMock(ContainerInterface::class);
-        $newException = new class ('is not a callable, none.') extends InvocationException {
+        $newException = new class('is not a callable, none.') extends InvocationException {
         };
 
         $container->method('has')->willReturn(false);
@@ -227,6 +256,22 @@ class CallableResolverTest extends TestCase
         yield 'String Method Get Type:' => [
             ['handler', 'method'],
         ];
+
+        yield 'String Method Get Type with @ Seperator:' => [
+            'handler@method',
+        ];
+    }
+
+    /**
+     * @return Generator
+     */
+    public function implicitMagicData(): Generator
+    {
+        yield ['container'];
+
+        yield [false];
+
+        yield [true];
     }
 
     /**
@@ -282,7 +327,7 @@ class CallableResolverTest extends TestCase
      */
     public static function notFoundException()
     {
-        return new class ('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
+        return new class('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
         };
     }
 }

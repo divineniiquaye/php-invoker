@@ -17,11 +17,9 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker;
 
-use Closure;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
 
@@ -33,7 +31,7 @@ use Throwable;
  */
 class CallableResolver
 {
-    public const CALLABLE_PATTERN = '!^([^\:]+)(:|@)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
+    public const CALLABLE_PATTERN = '#^([^\:]+)(\:|\@)([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$#';
 
     /**
      * @var null|ContainerInterface
@@ -48,57 +46,13 @@ class CallableResolver
     /**
      * Resolve the given callable into a real PHP callable.
      *
-     * @param array<mixed,string>|callable|string $callable
+     * @param array<mixed,string>|callable|object|string $callable
      *
      * @throws NotCallableException
      *
      * @return callable real PHP callable
      */
     public function resolve($callable)
-    {
-        // Shortcut for a very common use case
-        if ($callable instanceof Closure) {
-            return $callable;
-        }
-
-        if (\is_string($callable) && 1 === \preg_match(self::CALLABLE_PATTERN, $callable, $matches)) {
-            // check for callable as "class:method", and "class@method"
-            $callable = [$matches[1], $matches[3]];
-        }
-
-        // The callable is a container entry name
-        if (\is_string($callable) && null !== $this->container) {
-            try {
-                return $this->resolve($this->container->get($callable));
-            } catch (NotFoundExceptionInterface $e) {
-                if ($this->container->has($callable)) {
-                    throw NotCallableException::fromInvalidCallable($callable, true);
-                }
-            }
-        }
-
-        $callable = $this->resolveFromContainer($callable);
-
-        // Callable object or string (i.e. implementing __invoke())
-        if ((\is_string($callable) || \is_object($callable)) && \method_exists($callable, '__invoke')) {
-            return $this->resolve([$callable, '__invoke']);
-        }
-
-        if (!\is_callable($callable)) {
-            throw NotCallableException::fromInvalidCallable($callable, null !== $this->container);
-        }
-
-        return $callable;
-    }
-
-    /**
-     * @param array<mixed,string>|callable|string $callable
-     *
-     * @throws NotCallableException
-     *
-     * @return array<mixed,string>|callable|string
-     */
-    private function resolveFromContainer($callable)
     {
         $isStaticCallToNonStaticMethod = false;
 
@@ -109,45 +63,67 @@ class CallableResolver
             if (!$isStaticCallToNonStaticMethod) {
                 return $callable;
             }
+        } elseif (\is_string($callable) && 1 === \preg_match(self::CALLABLE_PATTERN, $callable, $matches)) {
+            // check for callable as "class:method", and "class@method"
+            $callable = [$matches[1], $matches[3]];
+        }
+
+        // The callable is a container entry name
+        if (\is_string($callable) && null !== $this->container) {
+            try {
+                $callable = $this->container->get($callable);
+            } catch (NotFoundExceptionInterface $e) {
+                throw NotCallableException::fromInvalidCallable($callable, true, $e);
+            }
+        }
+
+        return $this->resolveCallable($callable, $isStaticCallToNonStaticMethod);
+    }
+
+    /**
+     * @param array<mixed,string>|object|string $callable
+     * @param bool                              $isStaticCallToNonStaticMethod
+     *
+     * @throws NotCallableException
+     *
+     * @return array<mixed,string>|callable|string
+     */
+    private function resolveCallable($callable, bool $isStaticCallToNonStaticMethod)
+    {
+        // Callable object or string (i.e. implementing __invoke())
+        if ((\is_string($callable) || \is_object($callable)) && \method_exists($callable, '__invoke')) {
+            $callable = [$callable, '__invoke'];
         }
 
         // The callable is an array whose first item is a container entry name
         // e.g. ['some-container-entry', 'methodToCall']
         if (\is_array($callable) && \is_string($callable[0])) {
+            list($class, $method) = $callable;
+
             try {
                 if (null !== $this->container) {
                     // Replace the container entry name by the actual object
-                    $callable[0] = $this->container->get($callable[0]);
+                    $class = $this->container->get($class);
+                } elseif (\is_string($class) && \class_exists($class)) {
+                    $class = new $class();
                 }
 
-                if (\is_string($callable[0]) && \class_exists($callable[0])) {
-                    $callable[0] = (new ReflectionClass($callable[0]))->newInstance();
-                }
-
-                return $callable;
+                $callable = [$class, $method];
             } catch (Throwable $e) {
-                if (null !== $this->container && $this->container->has($callable[0])) {
-                    throw $e;
-                }
-
-                if ($e instanceof NotFoundExceptionInterface) {
-                    if ($isStaticCallToNonStaticMethod) {
-                        throw new NotCallableException(\sprintf(
-                            'Cannot call %s::%s() because %2$s() is not a static method and "%1$s" is not a container entry',
-                            $callable[0],
-                            $callable[1]
-                        ));
-                    }
-
+                if ($isStaticCallToNonStaticMethod) {
                     throw new NotCallableException(\sprintf(
-                        'Cannot call %s on %s because it is not a class nor a valid container entry',
-                        $callable[1],
-                        $callable[0]
-                    ));
+                        'Cannot call %s::%s() because %2$s() is not a static method and "%1$s" is not a valid',
+                        $callable[0],
+                        $callable[1]
+                    ), 0, $e);
                 }
 
-                throw NotCallableException::fromInvalidCallable($callable, null !== $this->container);
+                throw NotCallableException::fromInvalidCallable($callable, null !== $this->container, $e);
             }
+        }
+
+        if (!\is_callable($callable)) {
+            throw NotCallableException::fromInvalidCallable($callable, null !== $this->container);
         }
 
         // Unrecognized stuff, we let it fail later
