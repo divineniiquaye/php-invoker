@@ -11,9 +11,6 @@ parameters:
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/ArgumentResolver.php
         -
-            message: "#^Parameter \\#1 \\$object of function get_class expects object, array<int, string> given.$#"
-            path: src/CallableReflection.php
-        -
             message: "#^Construct empty\\(\\) is not allowed. Use more strict comparison.$#"
             path: src/Invoker.php
         -

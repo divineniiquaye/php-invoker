@@ -35,6 +35,18 @@
             </errorLevel>
         </InvalidCatch>
 
+        <InvalidArrayOffset>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </InvalidArrayOffset>
+
+        <InvalidArrayAccess>
+            <errorLevel type="suppress">
+                <file name="src/CallableReflection.php"/>
+            </errorLevel>
+        </InvalidArrayAccess>
+
         <ArgumentTypeCoercion>
             <errorLevel type="suppress">
                 <referencedFunction name="ReflectionClass::__construct"/>

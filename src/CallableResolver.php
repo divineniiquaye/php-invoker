@@ -81,12 +81,12 @@ class CallableResolver
     }
 
     /**
-     * @param array<mixed,string>|object|string $callable
-     * @param bool                              $isStaticCallToNonStaticMethod
+     * @param array<mixed,string>|callable|object|string $callable
+     * @param bool                                       $isStaticCallToNonStaticMethod
      *
      * @throws NotCallableException
      *
-     * @return array<mixed,string>|callable|string
+     * @return callable
      */
     private function resolveCallable($callable, bool $isStaticCallToNonStaticMethod)
     {
@@ -104,7 +104,7 @@ class CallableResolver
                 if (null !== $this->container) {
                     // Replace the container entry name by the actual object
                     $class = $this->container->get($class);
-                } elseif (\is_string($class) && \class_exists($class)) {
+                } elseif (\class_exists($class)) {
                     $class = new $class();
                 }
 
@@ -113,8 +113,8 @@ class CallableResolver
                 if ($isStaticCallToNonStaticMethod) {
                     throw new NotCallableException(\sprintf(
                         'Cannot call %s::%s() because %2$s() is not a static method and "%1$s" is not a valid',
-                        $callable[0],
-                        $callable[1]
+                        $class,
+                        $method
                     ), 0, $e);
                 }
 

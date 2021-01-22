@@ -17,9 +17,6 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker\Exceptions;
 
-use Psr\Container\ContainerExceptionInterface;
-use Throwable;
-
 /**
  * The given callable is not actually callable.
  *
@@ -28,9 +25,9 @@ use Throwable;
 class NotCallableException extends InvocationException
 {
     /**
-     * @param mixed                                 $value
-     * @param bool                                  $containerEntry
-     * @param ContainerExceptionInterface|Throwable $previous
+     * @param mixed      $value
+     * @param bool       $containerEntry
+     * @param \Throwable $previous
      *
      * @return InvocationException
      */

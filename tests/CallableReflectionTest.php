@@ -70,7 +70,7 @@ class CallableReflectionTest extends TestCase
 
     public function testCreateNotCallableException(): void
     {
-        $this->expectExceptionMessage('handler is not a callable');
+        $this->expectExceptionMessage('\'handler\' is not a callable');
         $this->expectException(NotCallableException::class);
 
         CallableReflection::create('handler');

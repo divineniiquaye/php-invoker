@@ -212,7 +212,7 @@ class CallableResolverTest extends TestCase
     public function testResolveWithContainerHasNotException(): void
     {
         $container    = $this->createMock(ContainerInterface::class);
-        $newException = new class('is not a callable, none.') extends InvocationException {
+        $newException = new class ('is not a callable, none.') extends InvocationException {
         };
 
         $container->method('has')->willReturn(false);
@@ -327,7 +327,7 @@ class CallableResolverTest extends TestCase
      */
     public static function notFoundException()
     {
-        return new class('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
+        return new class ('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
         };
     }
 }
