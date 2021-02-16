@@ -35,6 +35,7 @@
             <errorLevel type="suppress">
                 <file name="src/CallableResolver.php"/>
                 <file name="src/ArgumentResolver.php"/>
+                <referencedClass name="Psr\Container\NotFoundExceptionInterface"/>
             </errorLevel>
         </InvalidCatch>
 
@@ -81,5 +82,11 @@
                 <file name="src/ArgumentResolver.php"/>
             </errorLevel>
         </InvalidPropertyAssignmentValue>
+
+        <PossiblyNullReference>
+            <errorLevel type="suppress">
+                <file name="src/ArgumentResolver/TypeHintValueResolver.php"/>
+            </errorLevel>
+        </PossiblyNullReference>
     </issueHandlers>
 </psalm>
