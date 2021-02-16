@@ -69,4 +69,9 @@ class BlankClass
     {
         return [$name => $logger];
     }
+
+    public function selfMethod(self $blankClass): self
+    {
+        return $blankClass;
+    }
 }

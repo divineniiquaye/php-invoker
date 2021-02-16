@@ -22,12 +22,10 @@ use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
 use DivineNii\Invoker\Invoker;
 use DivineNii\Invoker\ArgumentResolver;
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use ReflectionFunctionAbstract;
 
 /**
  * ArgumentResolverTest
@@ -138,6 +136,19 @@ class ArgumentResolverTest extends TestCase
         $this->assertInstanceOf(NullLogger::class, \current($resolved));
     }
 
+    public function testGetParameterTypedNameOfSelf(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->never())->method('has')->willReturn(true);
+        $container->expects($this->once())->method('get')->willReturn($expected = new Fixtures\BlankClass());
+
+        $invoker = new Invoker([], $container);
+        $this->assertSame($expected, $invoker->call([$expected, 'selfMethod']));
+
+        $invoker = new Invoker();
+        $this->assertNotSame($expected, $invoker->call([$expected, 'selfMethod']));
+    }
+
     public function testAppendResolver(): void
     {
         $resolver = new ArgumentResolver();
@@ -170,9 +181,9 @@ class ArgumentResolverTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function implicitCallableContainerData(): Generator
+    public function implicitCallableContainerData(): \Generator
     {
         yield 'Container callable with named variable' => [
             [new Fixtures\BlankClass(), 'methodWithNamedParameter'],
@@ -184,9 +195,9 @@ class ArgumentResolverTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function implicitCallableData(): Generator
+    public function implicitCallableData(): \Generator
     {
         $logger = new NullLogger();
 
@@ -279,7 +290,7 @@ class ArgumentResolverTest extends TestCase
         ];
     }
 
-    private function createCallableReflection(callable $callable): ReflectionFunctionAbstract
+    private function createCallableReflection(callable $callable): \ReflectionFunctionAbstract
     {
         return CallableReflection::create($callable);
     }

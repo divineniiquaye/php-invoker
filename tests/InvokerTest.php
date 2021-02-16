@@ -22,11 +22,10 @@ use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
 use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
 use DivineNii\Invoker\Invoker;
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use stdClass;
 
 /**
  * InvokerTest
@@ -168,21 +167,21 @@ class InvokerTest extends TestCase
     public function testInvokeWithTypehintObjectInstance(): void
     {
         $invoker = new Invoker();
-        $result  = $invoker->call(function (stdClass $foo) {
+        $result  = $invoker->call(function (\stdClass $foo) {
             return $foo;
         });
 
-        $this->assertInstanceOf(stdClass::class, $result);
+        $this->assertInstanceOf(\stdClass::class, $result);
     }
 
     public function testInvokeWithTypehintContainerResolver(): void
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->willReturn(false);
-        $container->method('get')->with('stdClass')->willReturn($expected = new stdClass());
+        $container->method('get')->with('stdClass')->willReturn($expected = new \stdClass());
 
         $invoker = new Invoker([], $container);
-        $result  = $invoker->call(function (stdClass $foo): stdClass {
+        $result  = $invoker->call(function (\stdClass $foo): \stdClass {
             return $foo;
         });
 
@@ -193,7 +192,7 @@ class InvokerTest extends TestCase
     {
         $container = $this->createMock(ContainerInterface::class);
         $container->method('has')->willReturn(true);
-        $container->method('get')->with('foo')->willReturn($expected = new stdClass());
+        $container->method('get')->with('foo')->willReturn($expected = new \stdClass());
 
         $invoker = new Invoker([], $container);
         $result  = $invoker->call(function ($foo) {
@@ -263,19 +262,52 @@ class InvokerTest extends TestCase
         $invoker->call('foo');
     }
 
+    public function testInvokeWithCallingVariadicCallableWithContainer(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willReturn(new NullLogger());
+
+        $invoker = new Invoker([], $container);
+        $result  = $invoker->call(
+            function (LoggerInterface ...$loggers) {
+                return $loggers;
+            }
+        );
+
+        $this->assertIsArray($result);
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(LoggerInterface::class, \current($result));
+
+
+        $this->expectExceptionMessage(
+            'Unable to invoke the callable because no value was given for parameter 1 ($strings)'
+        );
+        $this->expectException(NotEnoughParametersException::class);
+
+        $container = $this->createMock(ContainerInterface::class);
+        $container->method('has')->willReturn(false);
+        $container->method('get')->willReturn(null);
+
+        $invoker = new Invoker([], $container);
+        $invoker->call(function (string ...$strings) {
+            return $strings;
+        });
+    }
+
     public function testInvokeWithCallingNonCallableObject(): void
     {
         $this->expectExceptionMessage('Instance of stdClass is not a callable');
         $this->expectException(NotCallableException::class);
 
         $invoker = new Invoker();
-        $invoker->call(new stdClass());
+        $invoker->call(new \stdClass());
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function invokableContainerData(): Generator
+    public function invokableContainerData(): \Generator
     {
         yield 'Should resolve array callable from container' => [
             ['thing-to-call', 'method'],
@@ -303,9 +335,9 @@ class InvokerTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function invokableData(): Generator
+    public function invokableData(): \Generator
     {
         $logger = new NullLogger();
 
@@ -353,6 +385,14 @@ class InvokerTest extends TestCase
             },
             ['foo', 'bar'],
             'foobar',
+        ];
+
+        yield 'Should invoke callable with variadic parameters indexed by position' => [
+            function ($foo, ...$bars) {
+                return [$foo => $bars];
+            },
+            ['foo', 'bars' => ['foo', 'bar', 'baz']],
+            ['foo' => ['foo', 'bar', 'baz']],
         ];
 
         yield 'Should invoke callable with parameters indexed by name' => [

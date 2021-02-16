@@ -18,8 +18,6 @@ declare(strict_types=1);
 namespace DivineNii\Invoker\ArgumentResolver;
 
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
-use ReflectionException;
-use ReflectionParameter;
 
 /**
  * Gets the default value defined in the action signature when no value has been given.
@@ -31,14 +29,15 @@ final class DefaultValueResolver implements ArgumentValueResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter, array $providedParameters)
+    public function resolve(\ReflectionParameter $parameter, array $providedParameters)
     {
-        if ($parameter->isOptional() || $parameter->isDefaultValueAvailable()) {
+
+        if ($parameter->isOptional() || $parameter->isDefaultValueAvailable() || $parameter->allowsNull()) {
             try {
                 $default = $parameter->getDefaultValue();
 
                 return null !== $default ? $default : __CLASS__;
-            } catch (ReflectionException $e) {
+            } catch (\ReflectionException $e) {
                 // Can't get default values from PHP internal classes and functions
             }
         }

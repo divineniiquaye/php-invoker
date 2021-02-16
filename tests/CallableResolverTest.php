@@ -21,12 +21,9 @@ use DivineNii\Invoker\CallableResolver;
 use DivineNii\Invoker\Exceptions\InvocationException;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Tests\Fixtures\BlankClassMagic;
-use Exception;
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Throwable;
 
 /**
  * CallableResolverTest
@@ -250,9 +247,9 @@ class CallableResolverTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function implicitContainerGets(): Generator
+    public function implicitContainerGets(): \Generator
     {
         yield 'String Invocable Get Type:' => [
             'handler',
@@ -268,9 +265,9 @@ class CallableResolverTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function implicitMagicData(): Generator
+    public function implicitMagicData(): \Generator
     {
         yield ['container'];
 
@@ -280,9 +277,9 @@ class CallableResolverTest extends TestCase
     }
 
     /**
-     * @return Generator
+     * @return \Generator
      */
-    public function implicitTypes(): Generator
+    public function implicitTypes(): \Generator
     {
         yield 'String Invocable Class Type:' => [
             Fixtures\BlankClass::class,
@@ -328,11 +325,11 @@ class CallableResolverTest extends TestCase
     }
 
     /**
-     * @return NotFoundExceptionInterface|Throwable
+     * @return NotFoundExceptionInterface|\Throwable
      */
     public static function notFoundException()
     {
-        return new class ('Is not a callable, yeah.') extends Exception implements NotFoundExceptionInterface {
+        return new class ('Is not a callable, yeah.') extends \Exception implements NotFoundExceptionInterface {
         };
     }
 }

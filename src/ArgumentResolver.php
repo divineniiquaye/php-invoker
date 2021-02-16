@@ -17,14 +17,12 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker;
 
-use DivineNii\Invoker\ArgumentResolver\ClassValueResolver;
 use DivineNii\Invoker\ArgumentResolver\DefaultValueResolver;
 use DivineNii\Invoker\ArgumentResolver\NamedValueResolver;
 use DivineNii\Invoker\ArgumentResolver\TypeHintValueResolver;
-use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
+use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
-use ReflectionFunctionAbstract;
 
 class ArgumentResolver implements ArgumentResolverInterface
 {
@@ -36,7 +34,7 @@ class ArgumentResolver implements ArgumentResolverInterface
 
     /**
      * @param iterable<ArgumentValueResolverInterface> $argumentValueResolvers
-     * @param null|ContainerInterface $container
+     * @param null|ContainerInterface                  $container
      */
     public function __construct(iterable $argumentValueResolvers = [], ?ContainerInterface $container = null)
     {
@@ -69,7 +67,7 @@ class ArgumentResolver implements ArgumentResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters = []): array
+    public function getParameters(\ReflectionFunctionAbstract $reflection, array $providedParameters = []): array
     {
         $resolvedParameters   = [];
         $reflectionParameters = $reflection->getParameters();
@@ -77,31 +75,31 @@ class ArgumentResolver implements ArgumentResolverInterface
         foreach ($reflectionParameters as $parameter) {
             $position = $parameter->getPosition();
 
-            /**
-             * Simply returns all the values of the $providedParameters array that are
-             * indexed by the parameter position (i.e. a number).
-             * E.g. `->call($callable, ['foo', 'bar'])` will simply resolve the parameters
-             * to `['foo', 'bar']`.
-             * Parameters that are not indexed by a number (i.e. parameter position)
-             * will be ignored.
-             */
-            if (isset($providedParameters[$position])) {
-                $providedParameters[$parameter->name] = $providedParameters[$position];
-                unset($providedParameters[$position]);
-            }
-
             foreach ($this->argumentValueResolvers as $resolver) {
                 if (null !== $resolved = $resolver->resolve($parameter, $providedParameters)) {
-                    $resolvedParameters[$position] = DefaultValueResolver::class !== $resolved ? $resolved : null;
+                    if ($resolved === DefaultValueResolver::class) {
+                        $resolved = null;
+                    }
+
+                    if ($parameter->isVariadic() && \is_array($resolved)) {
+                        if (\count($resolved) > 1) {
+                            foreach (\array_chunk($resolved, 1) as $index => [$value]) {
+                                $resolvedParameters[$index + 1] = $value;
+                            }
+
+                            continue;
+                        }
+
+                        $resolved = \current($resolved);
+                    }
+
+                    $resolvedParameters[$position] = $resolved;
                 }
 
                 if (empty(\array_diff_key($reflectionParameters, $resolvedParameters))) {
                     // Stop traversing: all parameters are resolved
                     return $resolvedParameters;
                 }
-
-                // continue to the next callable argument
-                continue 1;
             }
         }
 
@@ -114,9 +112,8 @@ class ArgumentResolver implements ArgumentResolverInterface
     public static function getDefaultArgumentValueResolvers(): iterable
     {
         return [
-            new TypeHintValueResolver(self::$container),
-            new ClassValueResolver(self::$container),
             new NamedValueResolver(self::$container),
+            new TypeHintValueResolver(self::$container),
             new DefaultValueResolver(),
         ];
     }

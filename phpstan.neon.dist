@@ -20,5 +20,5 @@ parameters:
             message: "#^Short ternary operator is not allowed. Use null coalesce operator if applicable or consider using long ternary.$#"
             path: src/ArgumentResolver.php
         -
-            message: "#^Only booleans are allowed in &&, string given on the left side.$#"
-            path: src/ArgumentResolver/NamedValueResolver.php
+            message: "#^Cannot call method getName\\(\\) on ReflectionClass\\|null.$#"
+            path: src/ArgumentResolver/TypeHintValueResolver.php

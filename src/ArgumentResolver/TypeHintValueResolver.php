@@ -19,10 +19,10 @@ namespace DivineNii\Invoker\ArgumentResolver;
 
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
-use ReflectionParameter;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Inject entries using type-hints.
+ * Inject entries using type-hints or create a class instance.
  * Tries to match type-hints with the parameters provided.
  *
  * @author Divine Niiquaye Ibok <divineibok@gmail.com>
@@ -40,24 +40,61 @@ class TypeHintValueResolver implements ArgumentValueResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter, array $providedParameters)
+    public function resolve(\ReflectionParameter $parameter, array $providedParameters)
     {
-        $parameterType = $parameter->getType();
+        $paramType = $parameter->getType();
+        $types  = $paramType instanceof \ReflectionUnionType ? $paramType->getTypes() : [$paramType];
+        $result = [];
 
-        if (!$parameterType instanceof \ReflectionNamedType || $parameterType->isBuiltin()) {
-            // No type, Primitive types and Union types are not supported
-            return;
+        foreach ($types as $parameterType) {
+            if (!$parameterType instanceof \ReflectionNamedType || $parameterType->isBuiltin()) {
+                // No type, Primitive types are not supported
+                return null;
+            }
+            $paramName = $parameterType->getName();
+
+            if ($paramName === 'self') {
+                $paramName = $parameter->getDeclaringClass()->getName();
+            }
+
+            if (\array_key_exists($paramName, $providedParameters)) {
+                $result[] = $providedParameters[$paramName];
+                unset($providedParameters[$paramName]);
+
+                continue;
+            }
+
+            // If an instance is detected
+            foreach ($providedParameters as $key => $value) {
+                if (\is_a($value, $paramName, true)) {
+                    $result[] = $providedParameters[$key];
+
+                    continue;
+                }
+            }
+
+            // Inject entries from a DI container using the type-hints.
+            if (null !== $this->container) {
+                try {
+                    $result[] = $this->container->get($paramName);
+
+                    continue;
+                } catch (NotFoundExceptionInterface $e) {
+                    // We need no exception thrown here
+                }
+            }
+
+            try {
+                if (\class_exists($paramName)) {
+                    $result[] = new $paramName();
+                }
+            } catch (\ArgumentCountError $e) {
+                // Throw no exception ...
+            }
         }
 
-        $parameterType = $parameterType->getName();
-
-        // Inject entries from a DI container using the type-hints.
-        if (null !== $this->container && $this->container->has($parameterType)) {
-            return $this->container->get($parameterType);
-        }
-
-        if (\array_key_exists($parameterType, $providedParameters)) {
-            return $providedParameters[$parameterType];
+        if ([] !== $result) {
+            return $parameter->isVariadic() ? $result : end($result);
         }
     }
 }

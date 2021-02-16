@@ -19,7 +19,6 @@ namespace DivineNii\Invoker\ArgumentResolver;
 
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
-use ReflectionParameter;
 
 /**
  * Tries to map an associative array (string-indexed) to the parameter names.
@@ -42,17 +41,37 @@ final class NamedValueResolver implements ArgumentValueResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(ReflectionParameter $parameter, array $providedParameters)
+    public function resolve(\ReflectionParameter $parameter, array $providedParameters)
     {
-        $name  = $parameter->name;
+        $paramName = $parameter->getName();
+        $position  = $parameter->getPosition();
 
-        // Inject entries from a DI container using the parameter names.
-        if ($name && (null !== $this->container && $this->container->has($name))) {
-            return $this->container->get($name);
+        /**
+         * Simply returns all the values of the $providedParameters array that are
+         * indexed by the parameter position (i.e. a number).
+         * E.g. `->call($callable, ['foo', 'bar'])` will simply resolve the parameters
+         * to `['foo', 'bar']`.
+         * Parameters that are not indexed by a number (i.e. parameter position)
+         * will be ignored.
+         */
+        if (isset($providedParameters[$position])) {
+            $providedParameters[$paramName] = $providedParameters[$position];
+            unset($providedParameters[$position]);
         }
 
-        if (\array_key_exists($name, $providedParameters)) {
-            return $providedParameters[$name];
+        if (\array_key_exists($paramName, $providedParameters)) {
+            $value = $providedParameters[$paramName];
+            unset($providedParameters[$paramName]);
+
+            return $value;
+        }
+
+        // Inject entries from a DI container using the parameter names.
+        if (
+            null === $parameter->getType() &&
+            (null !== $this->container && $this->container->has($paramName))
+        ) {
+            return $this->container->get($paramName);
         }
     }
 }

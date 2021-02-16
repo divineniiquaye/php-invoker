@@ -22,8 +22,6 @@ use DivineNii\Invoker\Exceptions\NotCallableException;
 use DivineNii\Invoker\Tests\Fixtures\BlankClass;
 use DivineNii\Invoker\Tests\Fixtures\BlankClassMagic;
 use PHPUnit\Framework\TestCase;
-use ReflectionFunction;
-use ReflectionMethod;
 
 /**
  * CallableReflectionTest
@@ -33,28 +31,28 @@ class CallableReflectionTest extends TestCase
     public function testCreate(): void
     {
         $this->assertInstanceOf(
-            ReflectionMethod::class,
+            \ReflectionMethod::class,
             CallableReflection::create('DivineNii\Invoker\Tests\Fixtures\BlankClass::staticMethod')
         );
 
         $this->assertInstanceOf(
-            ReflectionMethod::class,
+            \ReflectionMethod::class,
             CallableReflection::create([new BlankClass(), 'method'])
         );
 
         $this->assertInstanceOf(
-            ReflectionMethod::class,
+            \ReflectionMethod::class,
             CallableReflection::create(new BlankClass())
         );
 
         $this->assertInstanceOf(
-            ReflectionFunction::class,
+            \ReflectionFunction::class,
             CallableReflection::create(function (string $test): string {
                 return $test;
             })
         );
 
-        $this->assertInstanceOf(ReflectionFunction::class, CallableReflection::create('phpinfo'));
+        $this->assertInstanceOf(\ReflectionFunction::class, CallableReflection::create('phpinfo'));
     }
 
     public function testCreateCatchReflectionException(): void
