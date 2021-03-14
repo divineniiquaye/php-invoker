@@ -67,7 +67,7 @@ class InvokerTest extends TestCase
             /**
              * {@inheritdoc}
              */
-            public function has($id)
+            public function has(string $id): bool
             {
                 return true;
             }
@@ -75,7 +75,7 @@ class InvokerTest extends TestCase
             /**
              * {@inheritdoc}
              */
-            public function get($id)
+            public function get(string $id)
             {
                 return new Fixtures\BlankClass();
             }
