@@ -17,12 +17,7 @@ declare(strict_types=1);
 
 namespace DivineNii\Invoker;
 
-use Closure;
 use DivineNii\Invoker\Exceptions\NotCallableException;
-use ReflectionException;
-use ReflectionFunction;
-use ReflectionFunctionAbstract;
-use ReflectionMethod;
 
 /**
  * Create a reflection object from a callable.
@@ -37,13 +32,13 @@ class CallableReflection
      *
      * @throws NotCallableException
      *
-     * @return ReflectionFunctionAbstract
+     * @return \ReflectionFunctionAbstract
      */
-    public static function create($callable): ReflectionFunctionAbstract
+    public static function create($callable): \ReflectionFunctionAbstract
     {
         // Standard function and closure
-        if ($callable instanceof Closure || (\is_string($callable) && \function_exists($callable))) {
-            return new ReflectionFunction($callable);
+        if ($callable instanceof \Closure || (\is_string($callable) && \function_exists($callable))) {
+            return new \ReflectionFunction($callable);
         }
 
         if (is_object($callable) && method_exists($callable, '__invoke')) {
@@ -62,8 +57,8 @@ class CallableReflection
         list($class, $method) = $callable;
 
         try {
-            return new ReflectionMethod($class, $method);
-        } catch (ReflectionException $e) {
+            return new \ReflectionMethod($class, $method);
+        } catch (\ReflectionException $e) {
             throw NotCallableException::fromInvalidCallable($callable);
         }
     }

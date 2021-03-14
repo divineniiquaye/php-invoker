@@ -20,8 +20,6 @@ namespace DivineNii\Invoker;
 use DivineNii\Invoker\Exceptions\NotCallableException;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionMethod;
-use Throwable;
 
 /**
  * Resolves a callable from a container.
@@ -109,7 +107,7 @@ class CallableResolver
                 }
 
                 $callable = [$class, $method];
-            } catch (Throwable $e) {
+            } catch (\Throwable $e) {
                 if ($isStaticCallToNonStaticMethod) {
                     throw new NotCallableException(\sprintf(
                         'Cannot call %s::%s() because %2$s() is not a static method and "%1$s" is not a valid',
@@ -141,7 +139,7 @@ class CallableResolver
     {
         if (\is_array($callable) && \is_string($callable[0])) {
             list($class, $method) = $callable;
-            $reflection           = new ReflectionMethod($class, $method);
+            $reflection           = new \ReflectionMethod($class, $method);
 
             return !$reflection->isStatic();
         }

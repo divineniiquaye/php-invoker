@@ -21,7 +21,6 @@ use DivineNii\Invoker\Exceptions\NotEnoughParametersException;
 use DivineNii\Invoker\Interfaces\ArgumentResolverInterface;
 use DivineNii\Invoker\Interfaces\ArgumentValueResolverInterface;
 use Psr\Container\ContainerInterface;
-use ReflectionParameter;
 
 /**
  * Invoke a callable.
@@ -67,7 +66,7 @@ class Invoker implements Interfaces\InvokerInterface
         $diff = \array_diff_key($callableReflection->getParameters(), $args);
 
         if (!empty($diff)) {
-            /** @var ReflectionParameter $parameter */
+            /** @var \ReflectionParameter $parameter */
             $parameter = \reset($diff);
 
             throw new NotEnoughParametersException(\sprintf(
